@@ -35,16 +35,11 @@ export function BookingAside({ catalog }: { catalog: BookingCatalog }) {
       <p className="mt-3 max-w-sm text-[1.0625rem] text-muted-foreground lg:text-lg">
         Arte en la piel con tinta de jagua, diseñado y aplicado a mano.
       </p>
-      <ul className="mt-4 hidden flex-col items-center gap-1.5 text-[0.9375rem] lg:flex">
-        <li className="flex items-center gap-2.5">
-          <span aria-hidden className="size-1 rounded-full bg-accent" />
-          Dura de 1 a 2 semanas
-        </li>
-        <li className="flex items-center gap-2.5">
-          <span aria-hidden className="size-1 rounded-full bg-accent" />
-          Oscurece en las primeras 24–48 h
-        </li>
-      </ul>
+      <p className="mt-4 hidden items-center gap-2.5 text-[0.9375rem] lg:flex">
+        Dura de 1 a 2 semanas
+        <span aria-hidden className="size-1 rounded-full bg-accent" />
+        Oscurece en 24–48 h
+      </p>
 
       <section
         aria-label="Tu reserva hasta ahora"
