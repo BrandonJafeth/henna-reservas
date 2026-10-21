@@ -42,6 +42,14 @@ Los estados seleccionados (hora, tamaño, artista) usan el mismo beige del botó
 - Áreas táctiles: 44 px para botón, input, día del calendario y hora. El mínimo absoluto es 24 px, para enlaces en línea.
 - Separador de marca `<Ornament>` (—— • ——): se usa en cabeceras, recibos y pantallas finales. No va entre cada sección.
 
+## Calendarios (Schedule-X)
+
+- Tema mapeado a los tokens en `globals.css` bajo `.sx-kk`; nunca los violetas por defecto.
+- El número de cada día del mes es un `<button>` propio (`monthGridDate`) con `aria-pressed`: así se eligen días con teclado. Seleccionado = círculo `--foreground` y celda beige.
+- Horarios: color del lugar; los de "solo ese día" con borde punteado; días libres con rayado suave.
+- Citas: franja del color del estado sobre tinte casi blanco y texto oscuro; el estado también va escrito en el título.
+- Parches de accesibilidad sobre la librería (contraste de horas, objetivos de 24 px, `role="group"`) viven en `schedule-calendar.tsx` y `globals.css`.
+
 ## Movimiento
 
 - Animate UI está en Tabs, Checkbox, Radio y Switch. Sliding Number se usa en precios y totales.

@@ -5,6 +5,7 @@ import "@schedule-x/theme-default/dist/index.css"
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { ScheduleXCalendar, useNextCalendarApp } from "@schedule-x/react"
 import {
+  createViewDay,
   createViewMonthGrid,
   createViewWeek,
   type BackgroundEvent,
@@ -25,7 +26,7 @@ import { cn } from "@/lib/utils"
  * selección de días, y los eventos ya son enfocables por la librería.
  */
 
-export type CalendarView = "month-grid" | "week"
+export type CalendarView = "month-grid" | "week" | "day"
 
 export interface DaySelection {
   selected: ReadonlySet<string>
@@ -110,10 +111,17 @@ export function ScheduleCalendar({
   const [eventsService] = useState(() => createEventsServicePlugin())
   const [controls] = useState(() => createCalendarControlsPlugin())
 
+  // En pantallas chicas la semana (7 columnas) no se lee: se abre en Día.
+  const [initialView] = useState<CalendarView>(() =>
+    defaultView === "week" && typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches
+      ? "day"
+      : defaultView,
+  )
+
   const calendar = useNextCalendarApp(
     {
-      views: [createViewMonthGrid(), createViewWeek()],
-      defaultView,
+      views: [createViewMonthGrid(), createViewWeek(), createViewDay()],
+      defaultView: initialView,
       locale: "es-ES",
       firstDayOfWeek: 1,
       timezone: TIME_ZONE,

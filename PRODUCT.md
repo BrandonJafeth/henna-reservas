@@ -31,6 +31,8 @@ Arte artesanal hecho a mano por dos artistas locales con tinta de jagua natural 
 ## Capabilities and Constraints
 
 - Stack: Next.js 16 (App Router) + TypeScript estricto + Tailwind v4, pnpm, código en `src/`. shadcn/ui, Sileo (toasts), Animate UI (moderado), lucide-react.
+- Calendarios del panel: **Schedule-X v4** (vistas Mes/Semana/Día, plugins gratuitos: events-service y calendar-controls; sin arrastrar porque es premium y todo se hace con clic). Disponibilidad se maneja eligiendo días en el calendario; Citas tiene vista Lista y Calendario. El selector de día del formulario público sigue siendo react-day-picker.
+- Disponibilidad: `weekly_availability` es lo que se repite cada semana; `availability_overrides` admite varias filas por fecha (día libre, o los horarios de ese día, que reemplazan al semanal). "Solo este día" copia el semanal a la fecha antes de cambiarlo.
 - Formulario de reserva: **Stepperize v8** (`@stepperize/react`) para la navegación entre pasos, con un esquema Zod por paso, y react-hook-form para los campos. Cada paso guarda sus datos tipados en `stepper.data`. El envío se arma en un único lugar (`toBookingRequest` en `src/components/booking/wizard-model.ts`), que es lo que se adapta al migrar a Supabase.
 - Backend futuro: Supabase (tablas `profiles`, `locations`, `size_options`, `weekly_availability`, `availability_overrides`, `bookings`, `cash_movements`). Fase actual: solo UI con datos mock tipados.
 - Español de Costa Rica, colones (`₡6 500`, `Intl.NumberFormat('es-CR', CRC, 0 decimales)`), zona horaria `America/Costa_Rica`, `date-fns` locale `es`.

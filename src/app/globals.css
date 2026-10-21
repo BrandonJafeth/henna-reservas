@@ -285,6 +285,11 @@
   --sx-box-shadow-level3: 0 8px 24px -8px color-mix(in oklab, var(--foreground) 22%, transparent);
   --sx-border: 1px solid var(--border);
   font-family: var(--font-sans);
+  /* Contexto de apilamiento propio: los z-index internos de Schedule-X
+     (encabezado de semana = 100) no quedan por encima de modales ni barras. */
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
 }
 .sx-kk .sx-react-calendar-wrapper {
   width: 100%;
