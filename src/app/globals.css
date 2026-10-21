@@ -1,26 +1,304 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+ * K&K Henna Artistry · tokens de diseño
+ * ------------------------------------------------------------------
+ * Fuente de verdad del color, la tipografía y el radio. Ningún
+ * componente usa colores literales: todo pasa por estas variables.
+ *
+ * Contraste WCAG 2.2 (calculado con la fórmula de luminancia relativa).
+ * AA exige 4.5:1 texto normal · 3:1 texto grande y componentes.
+ *
+ * CLARO
+ *   foreground  #2B1D17 / background #F5EFE8 ... 14.25:1  AAA
+ *   foreground  #2B1D17 / card       #FBF8F3 ... 15.36:1  AAA
+ *   foreground  #2B1D17 / muted      #EDE3D8 ... 12.84:1  AAA
+ *   muted-fg    #6B5447 / background ...........  6.16:1  AA
+ *   muted-fg    #6B5447 / card ................  6.64:1  AA
+ *   muted-fg    #6B5447 / muted ...............  5.56:1  AA
+ *   primary     #8A5A3C / background (texto) ...  5.10:1  AA
+ *   primary     #8A5A3C / card (texto) .........  5.49:1  AA
+ *   primary     #8A5A3C / muted (texto) ........  4.59:1  AA
+ *   primary-fg  #FBF8F3 / primary .............  5.49:1  AA
+ *   success     #4F6B4C / background ...........  5.20:1  AA (era #5E7A5A: 4.17, no pasaba)
+ *   warning     #8C6220 / background ...........  4.74:1  AA (era #A0712A: 3.76, no pasaba)
+ *   destructive #A3442F / background ...........  5.37:1  AA
+ *   input       #977C6C / background ...........  3.40:1  componente (1.4.11)
+ *   input       #977C6C / card ................  3.66:1  componente (1.4.11)
+ *   ring        #8A5A3C / background ...........  5.10:1  componente
+ *   accent      #B98A6E / background ...........  2.66:1  SOLO DECORATIVO, nunca texto
+ *   border      #E3D3C6 / background ...........  1.28:1  SOLO DECORATIVO (divisiones)
+ *
+ * OSCURO
+ *   foreground  #F2E8DE / background #1E1512 ... 14.83:1  AAA
+ *   foreground  #F2E8DE / card       #2A1F1A ... 13.27:1  AAA
+ *   muted-fg    #C4AE9F / card ................  7.56:1  AAA
+ *   muted-fg    #C4AE9F / muted      #33261F ...  6.89:1  AA
+ *   primary     #D9A27F / card (texto) .........  7.20:1  AAA
+ *   primary-fg  #1E1512 / primary .............  8.05:1  AAA
+ *   success     #9DBB97 / card ................  7.63:1  AAA
+ *   warning     #DDAA5C / card ................  7.62:1  AAA
+ *   destructive #E58A73 / card ................  6.27:1  AA
+ *   input       #806A5D / card ................  3.16:1  componente
+ *   accent      #B98A6E / card ................  5.29:1  decorativo (pasa, pero no se usa en texto)
+ */
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-place-1: var(--place-1);
+  --color-place-1-ink: var(--place-1-ink);
+  --color-place-2: var(--place-2);
+  --color-place-2-ink: var(--place-2-ink);
+  --color-place-3: var(--place-3);
+  --color-place-3-ink: var(--place-3-ink);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-sans: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-cormorant), "Times New Roman", serif;
+  --font-display: var(--font-cormorant), "Times New Roman", serif;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
+  --radius-2xl: var(--radius);
+
+  --tracking-label: 0.25em;
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --radius: 8px;
+
+  --background: #f5efe8;
+  --foreground: #2b1d17;
+  --card: #fbf8f3;
+  --card-foreground: #2b1d17;
+  --popover: #fbf8f3;
+  --popover-foreground: #2b1d17;
+  --primary: #8a5a3c;
+  --primary-foreground: #fbf8f3;
+  --secondary: #ede3d8;
+  --secondary-foreground: #2b1d17;
+  --muted: #ede3d8;
+  --muted-foreground: #6b5447;
+  --accent: #b98a6e; /* decorativo: bordes, separadores, iconos de adorno */
+  --accent-foreground: #2b1d17;
+  --destructive: #a3442f;
+  --success: #4f6b4c;
+  --warning: #8c6220;
+  --border: #e3d3c6;
+  --input: #977c6c;
+  --ring: #8a5a3c;
+
+  /* Tonos de lugar: fondo de bloque + tinta. Se asignan por orden de lugar, no por nombre. */
+  --place-1: #ead6c6;
+  --place-1-ink: #6a3f25;
+  --place-2: #dbe2d4;
+  --place-2-ink: #3f5a3c;
+  --place-3: #e7dcc2;
+  --place-3-ink: #6b5017;
+
+  --chart-1: #8a5a3c;
+  --chart-2: #4f6b4c;
+  --chart-3: #b98a6e;
+  --chart-4: #8c6220;
+  --chart-5: #6b5447;
+
+  --sidebar: #fbf8f3;
+  --sidebar-foreground: #2b1d17;
+  --sidebar-primary: #8a5a3c;
+  --sidebar-primary-foreground: #fbf8f3;
+  --sidebar-accent: #ede3d8;
+  --sidebar-accent-foreground: #2b1d17;
+  --sidebar-border: #e3d3c6;
+  --sidebar-ring: #8a5a3c;
+
+  color-scheme: light;
+}
+
+.dark {
+  --background: #1e1512;
+  --foreground: #f2e8de;
+  --card: #2a1f1a;
+  --card-foreground: #f2e8de;
+  --popover: #2a1f1a;
+  --popover-foreground: #f2e8de;
+  --primary: #d9a27f;
+  --primary-foreground: #1e1512;
+  --secondary: #33261f;
+  --secondary-foreground: #f2e8de;
+  --muted: #33261f;
+  --muted-foreground: #c4ae9f;
+  --accent: #b98a6e;
+  --accent-foreground: #f2e8de;
+  --destructive: #e58a73;
+  --success: #9dbb97;
+  --warning: #ddaa5c;
+  --border: #4a3830;
+  --input: #806a5d;
+  --ring: #d9a27f;
+
+  --place-1: #4a3226;
+  --place-1-ink: #f0c9ad;
+  --place-2: #34402f;
+  --place-2-ink: #c5dbbf;
+  --place-3: #463b22;
+  --place-3-ink: #ead198;
+
+  --chart-1: #d9a27f;
+  --chart-2: #9dbb97;
+  --chart-3: #b98a6e;
+  --chart-4: #ddaa5c;
+  --chart-5: #c4ae9f;
+
+  --sidebar: #241a16;
+  --sidebar-foreground: #f2e8de;
+  --sidebar-primary: #d9a27f;
+  --sidebar-primary-foreground: #1e1512;
+  --sidebar-accent: #33261f;
+  --sidebar-accent-foreground: #f2e8de;
+  --sidebar-border: #4a3830;
+  --sidebar-ring: #d9a27f;
+
+  color-scheme: dark;
+}
+
+/* Sileo: estados con la paleta de la marca */
+:root,
+.dark {
+  --sileo-state-success: var(--success);
+  --sileo-state-error: var(--destructive);
+  --sileo-state-warning: var(--warning);
+  --sileo-state-info: var(--primary);
+  --sileo-state-action: var(--primary);
+  --sileo-state-loading: var(--muted-foreground);
+  --sileo-width: min(360px, calc(100vw - 32px));
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "kern", "liga";
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  ::selection {
+    background-color: color-mix(in oklab, var(--primary) 22%, transparent);
+    color: var(--foreground);
+  }
+  input,
+  textarea,
+  select {
+    caret-color: var(--primary);
+  }
+  a {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  * {
+    scrollbar-color: color-mix(in oklab, var(--accent) 60%, transparent) transparent;
+    scrollbar-width: thin;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums lining-nums;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Toasts de Sileo sobre la paleta */
+[data-sileo-title] {
+  text-transform: none !important;
+  font-family: var(--font-sans);
+  font-size: 0.875rem !important;
+}
+[data-sileo-viewport] [data-sileo-description] {
+  color: var(--muted-foreground) !important;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+}
+
+/* Movimiento reducido: todo instantáneo */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/*
+ * Sliding Number (Animate UI) con Cormorant: números lining y columna
+ * más alta para que el dígito vecino no asome por arriba o por abajo.
+ */
+.kk-slide,
+.kk-slide * {
+  /* El estilo en línea de la librería fija font-variant-numeric; las
+     features OpenType van por otra propiedad y no se pisan. */
+  font-feature-settings: "lnum" 1, "tnum" 1;
+}
+.kk-slide span[style*="overflow-y"] {
+  line-height: 1.35 !important;
 }
