@@ -27,7 +27,7 @@ export function BookingAside({ catalog }: { catalog: BookingCatalog }) {
   ]
 
   return (
-    <header className="flex flex-col items-center pt-8 pb-6 text-center lg:sticky lg:top-0 lg:h-dvh lg:items-start lg:justify-center lg:py-16 lg:text-left">
+    <header className="flex flex-col items-center pt-8 pb-6 text-center lg:sticky lg:top-0 lg:h-dvh lg:justify-center lg:py-16">
       <Logo size="sm" className="lg:hidden" />
       <Logo size="lg" className="hidden lg:inline-flex" />
       <Ornament width="sm" className="mt-5 lg:mt-8" />
@@ -35,7 +35,7 @@ export function BookingAside({ catalog }: { catalog: BookingCatalog }) {
       <p className="mt-3 max-w-sm text-[1.0625rem] text-muted-foreground lg:text-lg">
         Arte en la piel con tinta de jagua, diseñado y aplicado a mano.
       </p>
-      <ul className="mt-4 hidden flex-col gap-1.5 text-[0.9375rem] lg:flex">
+      <ul className="mt-4 hidden flex-col items-center gap-1.5 text-[0.9375rem] lg:flex">
         <li className="flex items-center gap-2.5">
           <span aria-hidden className="size-1 rounded-full bg-accent" />
           Dura de 1 a 2 semanas

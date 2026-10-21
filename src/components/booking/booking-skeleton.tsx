@@ -8,7 +8,7 @@ export function BookingSkeleton() {
       aria-label="Cargando el formulario de reserva"
       className="mx-auto grid w-full max-w-6xl gap-x-16 px-4 sm:px-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:px-10"
     >
-      <div className="flex flex-col items-center gap-4 pt-8 pb-6 lg:h-dvh lg:items-start lg:justify-center">
+      <div className="flex flex-col items-center gap-4 pt-8 pb-6 lg:h-dvh lg:justify-center">
         <Logo size="sm" className="lg:hidden" />
         <Logo size="lg" className="hidden lg:inline-flex" />
         <Skeleton className="mt-4 h-10 w-56 lg:h-14 lg:w-80" />
