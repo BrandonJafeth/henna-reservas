@@ -13,25 +13,22 @@ import type {
   Settings,
   SizeOption,
   UUID,
-  WeeklyAvailability,
 } from "@/types/database"
 import {
   bookingRequestSchema,
+  availabilityRangeSchema,
   cashMovementSchema,
-  overrideSchema,
   settingsSchema,
   sizeOptionSchema,
-  weeklyBlockSchema,
+  type AvailabilityRangeInput,
   type BookingRequest,
   type CashMovementInput,
-  type OverrideInput,
   type SizeOptionInput,
-  type WeeklyBlockInput,
 } from "@/lib/schemas"
-import { addDays } from "date-fns"
-import { parseISODateCR, toISODateCR } from "@/lib/format"
+import { toISODateCR } from "@/lib/format"
+import { overlaps, weekdayOf, type Block } from "@/lib/availability"
 import { getAvailableDays, getAvailableSlots } from "./queries"
-import { db, latency, newId } from "./store"
+import { db, latency, newId, type MockDB } from "./store"
 
 /**
  * Mutaciones y lecturas que el cliente pide de forma interactiva.
@@ -118,86 +115,192 @@ export async function createBookingRequest(input: BookingRequest): Promise<Actio
 
 /* --------------------------- Disponibilidad --------------------------- */
 
-export async function saveWeeklyBlock(input: WeeklyBlockInput): Promise<ActionResult<WeeklyAvailability>> {
-  await latency(400)
-  const parsed = weeklyBlockSchema.safeParse(input)
-  if (!parsed.success) return fail("VALIDATION", parsed.error.issues[0]?.message ?? "Datos inválidos")
-  const v = parsed.data
-  const d = db()
-  const overlaps = d.weekly_availability.some(
-    (w) =>
-      w.id !== v.id &&
-      w.artist_id === v.artist_id &&
-      w.weekday === v.weekday &&
-      v.start_time < w.end_time &&
-      v.end_time > w.start_time,
+const WEEKDAY_NAME = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"]
+
+/**
+ * Convierte el horario semanal de esa fecha en filas propias de la fecha,
+ * para poder cambiar "solo este día" sin tocar las demás semanas.
+ * Si la fecha ya tiene filas propias, no hace nada. Quita el "día libre".
+ */
+function materializeDay(d: MockDB, artistId: UUID, date: string): AvailabilityOverride[] {
+  d.availability_overrides = d.availability_overrides.filter(
+    (o) => !(o.artist_id === artistId && o.date === date && o.is_day_off),
   )
-  if (overlaps) return fail("VALIDATION", "Ese bloque se cruza con otro del mismo día.")
-  const row: WeeklyAvailability = { ...v, weekday: v.weekday as WeeklyAvailability["weekday"], id: v.id ?? newId("wa") }
-  const i = d.weekly_availability.findIndex((w) => w.id === row.id)
-  if (i >= 0) d.weekly_availability[i] = row
-  else d.weekly_availability.push(row)
-  refreshAdmin()
-  return { ok: true, data: row }
+  const existing = d.availability_overrides.filter((o) => o.artist_id === artistId && o.date === date)
+  if (existing.length) return existing
+  const weekday = weekdayOf(date)
+  const copies = d.weekly_availability
+    .filter((w) => w.artist_id === artistId && w.weekday === weekday)
+    .map<AvailabilityOverride>((w) => ({
+      id: newId("ov"),
+      artist_id: artistId,
+      date,
+      is_day_off: false,
+      location_id: w.location_id,
+      start_time: w.start_time,
+      end_time: w.end_time,
+      note: null,
+    }))
+  d.availability_overrides.push(...copies)
+  return copies
 }
 
-export async function deleteWeeklyBlock(id: UUID): Promise<ActionResult<null>> {
-  await latency(300)
-  const d = db()
-  d.weekly_availability = d.weekly_availability.filter((w) => w.id !== id)
-  refreshAdmin()
-  return { ok: true, data: null }
-}
-
-export async function saveOverride(input: OverrideInput): Promise<ActionResult<AvailabilityOverride>> {
+/** Asigna un horario a uno o varios días: solo esas fechas, o repetido cada semana. */
+export async function applyAvailability(input: AvailabilityRangeInput): Promise<ActionResult<{ created: number; customDays: number }>> {
   await latency(400)
-  const parsed = overrideSchema.safeParse(input)
+  const parsed = availabilityRangeSchema.safeParse(input)
   if (!parsed.success) return fail("VALIDATION", parsed.error.issues[0]?.message ?? "Datos inválidos")
   const v = parsed.data
   const d = db()
-  const row: AvailabilityOverride = {
-    ...v,
-    id: v.id ?? newId("ov"),
-    location_id: v.is_day_off ? null : v.location_id,
-    start_time: v.is_day_off ? null : v.start_time,
-    end_time: v.is_day_off ? null : v.end_time,
+  const block = { start_time: v.start_time, end_time: v.end_time }
+
+  if (v.repeat === "weekly") {
+    const weekdays = [...new Set(v.dates.map(weekdayOf))]
+    for (const wd of weekdays) {
+      const clash = d.weekly_availability.find((w) => w.artist_id === v.artist_id && w.weekday === wd && overlaps(w, block))
+      if (clash) return fail("VALIDATION", `Los ${WEEKDAY_NAME[wd]} ya tienen un horario que se cruza (${clash.start_time}–${clash.end_time}).`)
+    }
+    for (const wd of weekdays) {
+      d.weekly_availability.push({ id: newId("wa"), artist_id: v.artist_id, weekday: wd, location_id: v.location_id, ...block })
+    }
+    // Días con horario propio no muestran el semanal: se informa para que la admin decida.
+    const customDays = v.dates.filter((date) => d.availability_overrides.some((o) => o.artist_id === v.artist_id && o.date === date)).length
+    refreshAdmin()
+    return { ok: true, data: { created: weekdays.length, customDays } }
   }
-  const clash = d.availability_overrides.find((o) => o.id !== row.id && o.artist_id === row.artist_id && o.date === row.date)
-  if (clash) return fail("VALIDATION", "Ya hay una excepción para esa fecha. Editala en lugar de crear otra.")
-  const i = d.availability_overrides.findIndex((o) => o.id === row.id)
-  if (i >= 0) d.availability_overrides[i] = row
-  else d.availability_overrides.push(row)
+
+  for (const date of v.dates) {
+    const rows = d.availability_overrides.filter((o) => o.artist_id === v.artist_id && o.date === date && !o.is_day_off)
+    const base = rows.length
+      ? rows
+      : d.weekly_availability.filter((w) => w.artist_id === v.artist_id && w.weekday === weekdayOf(date))
+    const clash = base.find((b) => b.start_time && b.end_time && overlaps({ start_time: b.start_time, end_time: b.end_time }, block))
+    if (clash) return fail("VALIDATION", `El ${date} ya tiene un horario que se cruza (${clash.start_time}–${clash.end_time}).`)
+  }
+  for (const date of v.dates) {
+    materializeDay(d, v.artist_id, date)
+    d.availability_overrides.push({
+      id: newId("ov"),
+      artist_id: v.artist_id,
+      date,
+      is_day_off: false,
+      location_id: v.location_id,
+      start_time: v.start_time,
+      end_time: v.end_time,
+      note: null,
+    })
+  }
   refreshAdmin()
-  return { ok: true, data: row }
+  return { ok: true, data: { created: v.dates.length, customDays: 0 } }
 }
 
-export async function deleteOverride(id: UUID): Promise<ActionResult<null>> {
+/** Marca días como libres (reemplaza cualquier horario de esas fechas). */
+export async function markDaysOff(input: { artist_id: UUID; dates: string[] }): Promise<ActionResult<{ count: number }>> {
+  await latency(400)
+  if (!input.dates.length) return fail("VALIDATION", "Elegí al menos un día.")
+  const d = db()
+  const set = new Set(input.dates)
+  d.availability_overrides = d.availability_overrides.filter((o) => !(o.artist_id === input.artist_id && set.has(o.date)))
+  for (const date of set) {
+    d.availability_overrides.push({
+      id: newId("ov"),
+      artist_id: input.artist_id,
+      date,
+      is_day_off: true,
+      location_id: null,
+      start_time: null,
+      end_time: null,
+      note: null,
+    })
+  }
+  refreshAdmin()
+  return { ok: true, data: { count: set.size } }
+}
+
+/** Quita los cambios de esas fechas: vuelven al horario semanal. */
+export async function resetDays(input: { artist_id: UUID; dates: string[] }): Promise<ActionResult<{ count: number }>> {
   await latency(300)
   const d = db()
-  d.availability_overrides = d.availability_overrides.filter((o) => o.id !== id)
+  const set = new Set(input.dates)
+  const before = d.availability_overrides.length
+  d.availability_overrides = d.availability_overrides.filter((o) => !(o.artist_id === input.artist_id && set.has(o.date)))
+  refreshAdmin()
+  return { ok: true, data: { count: before - d.availability_overrides.length } }
+}
+
+type OccurrenceRef = { artist_id: UUID; date: string; source: Block["source"]; scope: "day" | "weekly" }
+
+/** Edita un bloque de un día: solo ese día, o el horario semanal (todas las semanas). */
+export async function updateOccurrence(
+  input: OccurrenceRef & { start_time: string; end_time: string; location_id: UUID },
+): Promise<ActionResult<null>> {
+  await latency(400)
+  if (input.end_time <= input.start_time) return fail("VALIDATION", "La hora de fin debe ser después del inicio.")
+  const d = db()
+  const block = { start_time: input.start_time, end_time: input.end_time }
+
+  if (input.scope === "weekly") {
+    if (input.source.kind !== "weekly") return fail("VALIDATION", "Este horario es solo de ese día.")
+    const row = d.weekly_availability.find((w) => w.id === input.source.id)
+    if (!row) return fail("NOT_FOUND", "No encontramos ese horario.")
+    const clash = d.weekly_availability.find((w) => w.id !== row.id && w.artist_id === row.artist_id && w.weekday === row.weekday && overlaps(w, block))
+    if (clash) return fail("VALIDATION", `Se cruza con ${clash.start_time}–${clash.end_time} del mismo día.`)
+    Object.assign(row, block, { location_id: input.location_id })
+    refreshAdmin()
+    return { ok: true, data: null }
+  }
+
+  // Solo este día: si viene del semanal, se copia el día y se edita la copia.
+  let targetId = input.source.id
+  if (input.source.kind === "weekly") {
+    const weekly = d.weekly_availability.find((w) => w.id === input.source.id)
+    const copies = materializeDay(d, input.artist_id, input.date)
+    targetId = copies.find((c) => c.start_time === weekly?.start_time && c.end_time === weekly?.end_time)?.id ?? ""
+  }
+  const row = d.availability_overrides.find((o) => o.id === targetId)
+  if (!row) return fail("NOT_FOUND", "No encontramos ese horario.")
+  const clash = d.availability_overrides.find(
+    (o) => o.id !== row.id && o.artist_id === row.artist_id && o.date === row.date && o.start_time && o.end_time && overlaps({ start_time: o.start_time, end_time: o.end_time }, block),
+  )
+  if (clash) return fail("VALIDATION", `Se cruza con ${clash.start_time}–${clash.end_time} de ese día.`)
+  Object.assign(row, block, { location_id: input.location_id })
   refreshAdmin()
   return { ok: true, data: null }
 }
 
-/** Copia las excepciones de la semana anterior a `weekStart` (lunes, YYYY-MM-DD). */
-export async function copyPreviousWeekOverrides(
-  artistId: UUID,
-  weekStart: string,
-): Promise<ActionResult<{ copied: number }>> {
-  await latency(500)
+/** Quita un bloque: solo de ese día, o del horario semanal. */
+export async function deleteOccurrence(input: OccurrenceRef): Promise<ActionResult<null>> {
+  await latency(300)
   const d = db()
-  const start = parseISODateCR(weekStart)
-  const prevDays = Array.from({ length: 7 }, (_, i) => toISODateCR(addDays(start, i - 7)))
-  const source = d.availability_overrides.filter((o) => o.artist_id === artistId && prevDays.includes(o.date))
-  let copied = 0
-  for (const o of source) {
-    const date = toISODateCR(addDays(parseISODateCR(o.date), 7))
-    if (d.availability_overrides.some((x) => x.artist_id === artistId && x.date === date)) continue
-    d.availability_overrides.push({ ...o, id: newId("ov"), date })
-    copied++
+  if (input.scope === "weekly") {
+    if (input.source.kind !== "weekly") return fail("VALIDATION", "Este horario es solo de ese día.")
+    d.weekly_availability = d.weekly_availability.filter((w) => w.id !== input.source.id)
+    refreshAdmin()
+    return { ok: true, data: null }
+  }
+  let targetId = input.source.id
+  if (input.source.kind === "weekly") {
+    const weekly = d.weekly_availability.find((w) => w.id === input.source.id)
+    const copies = materializeDay(d, input.artist_id, input.date)
+    targetId = copies.find((c) => c.start_time === weekly?.start_time && c.end_time === weekly?.end_time)?.id ?? ""
+  }
+  d.availability_overrides = d.availability_overrides.filter((o) => o.id !== targetId)
+  // Si el día quedó sin bloques propios, se marca libre (si no, volvería el semanal).
+  const left = d.availability_overrides.some((o) => o.artist_id === input.artist_id && o.date === input.date)
+  if (!left) {
+    d.availability_overrides.push({
+      id: newId("ov"),
+      artist_id: input.artist_id,
+      date: input.date,
+      is_day_off: true,
+      location_id: null,
+      start_time: null,
+      end_time: null,
+      note: null,
+    })
   }
   refreshAdmin()
-  return { ok: true, data: { copied } }
+  return { ok: true, data: null }
 }
 
 /* -------------------------------- Citas -------------------------------- */

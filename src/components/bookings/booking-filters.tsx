@@ -13,10 +13,13 @@ export function BookingFilters({
   artists,
   locations,
   values,
+  showDate = true,
 }: {
   artists: Pick<Profile, "id" | "full_name">[]
   locations: Location[]
   values: { estado: string; artista: string; lugar: string; fecha: DatePreset }
+  /** En la vista calendario la fecha se elige en el calendario */
+  showDate?: boolean
 }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -31,9 +34,10 @@ export function BookingFilters({
     start(() => router.replace(q ? `${pathname}?${q}` : pathname, { scroll: false }))
   }
 
-  const dirty = values.estado !== "todas" || values.artista !== "todas" || values.lugar !== "todos" || values.fecha !== "proximas"
+  const dirty =
+    values.estado !== "todas" || values.artista !== "todas" || values.lugar !== "todos" || (showDate && values.fecha !== "proximas")
 
-  const fields = [
+  const allFields = [
     {
       id: "f-estado",
       label: "Estado",
@@ -64,9 +68,11 @@ export function BookingFilters({
     },
   ]
 
+  const fields = showDate ? allFields : allFields.filter((f) => f.id !== "f-fecha")
+
   return (
     <div role="search" aria-label="Filtrar citas" aria-busy={pending || undefined} className="flex flex-col gap-3">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-[repeat(4,minmax(0,1fr))_auto] lg:items-end">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-[repeat(var(--n),minmax(0,1fr))_auto] lg:items-end" style={{ "--n": fields.length } as React.CSSProperties}>
         {fields.map((f) => (
           <div key={f.id} className="flex min-w-0 flex-col gap-1.5">
             <Label htmlFor={f.id} className="text-xs text-muted-foreground">

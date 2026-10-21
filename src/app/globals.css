@@ -251,3 +251,160 @@
 .kk-slide span[style*="overflow-y"] {
   line-height: 1.35 !important;
 }
+
+/* ------------------------------------------------------------------
+ * Schedule-X con la paleta de la marca (solo dentro de .sx-kk)
+ * ------------------------------------------------------------------ */
+.sx-kk {
+  --sx-color-primary: var(--primary);
+  --sx-color-on-primary: var(--primary-foreground);
+  --sx-color-primary-container: var(--button);
+  --sx-color-on-primary-container: var(--button-foreground);
+  --sx-color-secondary: var(--muted-foreground);
+  --sx-color-on-secondary: var(--card);
+  --sx-color-secondary-container: var(--muted);
+  --sx-color-on-secondary-container: var(--foreground);
+  --sx-color-surface: var(--card);
+  --sx-color-surface-dim: var(--muted);
+  --sx-color-surface-bright: var(--card);
+  --sx-color-on-surface: var(--foreground);
+  --sx-color-surface-container: var(--muted);
+  --sx-color-surface-container-low: var(--background);
+  --sx-color-surface-container-high: var(--muted);
+  --sx-color-background: var(--card);
+  --sx-color-on-background: var(--foreground);
+  --sx-color-outline: var(--input);
+  --sx-color-outline-variant: var(--border);
+  --sx-color-surface-tint: var(--primary);
+  --sx-internal-color-text: var(--foreground);
+  --sx-internal-color-gray-ripple-background: var(--muted);
+  --sx-internal-color-light-gray: var(--background);
+  --sx-rounding-extra-small: 4px;
+  --sx-rounding-small: 6px;
+  --sx-rounding-extra-large: 8px;
+  --sx-box-shadow-level3: 0 8px 24px -8px color-mix(in oklab, var(--foreground) 22%, transparent);
+  --sx-border: 1px solid var(--border);
+  font-family: var(--font-sans);
+}
+.sx-kk .sx-react-calendar-wrapper {
+  width: 100%;
+  height: auto;
+}
+/* El número del día va por encima del rayado de "día libre" */
+.sx-kk .sx__month-grid-day__header {
+  position: relative;
+  z-index: 1;
+}
+.sx-kk .sx__calendar-wrapper {
+  border: 1px solid color-mix(in oklab, var(--accent) 45%, transparent);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.sx-kk .sx__calendar {
+  border: 0;
+}
+.sx-kk .sx__month-grid-day__header-day-name,
+.sx-kk .sx__week-grid__day-name {
+  color: var(--muted-foreground);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+}
+.sx-kk .sx__range-heading {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Número de día: botón real para elegir días */
+.sx-kk .sx-kk-date {
+  display: inline-flex;
+  min-width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  background: transparent;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.sx-kk button.sx-kk-date:hover:not(:disabled) {
+  border-color: var(--input);
+}
+.sx-kk button.sx-kk-date:disabled {
+  color: color-mix(in oklab, var(--muted-foreground) 70%, transparent);
+  cursor: default;
+}
+.sx-kk .sx-kk-date[data-selected] {
+  background: var(--foreground);
+  color: var(--card);
+  font-weight: 500;
+}
+.sx-kk .sx__is-today .sx-kk-date:not([data-selected]) {
+  border-color: var(--foreground);
+}
+.sx-kk .sx__month-grid-day:has(.sx-kk-date[data-selected]) {
+  background: color-mix(in oklab, var(--button) 55%, transparent);
+}
+.sx-kk .sx__month-grid-day.is-leading-or-trailing {
+  background: color-mix(in oklab, var(--muted) 40%, transparent);
+}
+
+/* Eventos del mes */
+.sx-kk .sx-kk-event {
+  display: flex;
+  min-width: 0;
+  gap: 0.35rem;
+  padding: 1px 4px;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.sx-kk .sx-kk-event.is-dashed {
+  outline: 1px dashed currentColor;
+  outline-offset: -1px;
+  border-radius: 4px;
+}
+.sx-kk .sx-kk-event__time {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.sx-kk .sx-kk-event__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+@media (max-width: 640px) {
+  .sx-kk .sx-kk-event__time {
+    display: none;
+  }
+  .sx-kk .sx-kk-date {
+    min-width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* Schedule-X: accesibilidad (contraste y tamaño de objetivos) */
+.sx-kk .sx__week-grid__date-number,
+.sx-kk .sx__week-grid__hour-text,
+.sx-kk .sx__month-grid-day__header-day-name,
+.sx-kk .sx__week-grid__day-name {
+  color: var(--muted-foreground);
+}
+.sx-kk .sx__date-input-chevron-wrapper {
+  min-width: 24px;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.sx-kk .sx__month-grid-event {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+}

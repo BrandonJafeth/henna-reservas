@@ -44,25 +44,37 @@ async function audit(page: Page, label: string) {
       await audit(page, "paso 3")
     })
 
-    test("/admin/disponibilidad · pestañas", async ({ page }) => {
+    test("/admin/disponibilidad · calendario", async ({ page }) => {
       await page.goto("/admin/disponibilidad")
       await expect(page.getByRole("heading", { name: "Disponibilidad", level: 1 })).toBeVisible()
-      await expect(page.getByRole("tab", { name: "Horario semanal" })).toBeVisible()
-      await expect(page.getByRole("heading", { name: "Lunes" })).toBeVisible()
-      await audit(page, "horario semanal")
+      await expect(page.getByRole("region", { name: /Calendario de disponibilidad/ })).toBeVisible()
+      await expect(page.getByRole("heading", { name: "Elegí días en el calendario" })).toBeVisible()
+      await audit(page, "calendario sin selección")
 
-      await page.getByRole("tab", { name: "Excepciones" }).click()
-      await expect(page.getByRole("button", { name: "Copiar semana anterior" })).toBeVisible()
-      await audit(page, "excepciones")
+      // Elegir días con teclado: el número de cada día es un botón real.
+      const days = page.locator("button.sx-kk-date:not([disabled])")
+      await days.nth(1).focus()
+      await page.keyboard.press("Enter")
+      await days.nth(3).click()
+      await expect(page.getByRole("heading", { name: "2 días elegidos" })).toBeVisible()
+      await expect(days.nth(1)).toHaveAttribute("aria-pressed", "true")
+      await audit(page, "panel con dos días")
 
-      await page.getByRole("tab", { name: "Calendario" }).click()
-      await expect(page.getByRole("button", { name: "Semana siguiente" })).toBeVisible()
-      await audit(page, "calendario")
+      // Un solo día con horario semanal: editar abre el modal con alcance.
+      await page.getByRole("button", { name: "Quitar la selección" }).click()
+      const withBlocks = page.locator('button.sx-kk-date:not([disabled])[aria-label*="horario semanal"]').first()
+      await withBlocks.click()
+      await page.getByRole("button", { name: /, editar/ }).first().click()
+      await expect(page.getByRole("dialog", { name: "Editar horario" })).toBeVisible()
+      await expect(page.getByRole("radio", { name: /^Todos los / })).toBeChecked()
+      await audit(page, "modal editar horario")
+    })
 
-      await page.getByRole("tab", { name: "Horario semanal" }).click()
-      await page.getByRole("button", { name: /Agregar bloque el lunes/ }).click()
-      await expect(page.getByRole("dialog", { name: "Nuevo bloque de horario" })).toBeVisible()
-      await audit(page, "diálogo de bloque")
+    test("/admin/citas · calendario", async ({ page }) => {
+      await page.goto("/admin/citas?vista=calendario")
+      await expect(page.getByRole("region", { name: "Calendario de citas" })).toBeVisible()
+      await expect(page.getByRole("link", { name: "Calendario" })).toHaveAttribute("aria-current", "page")
+      await audit(page, "citas en calendario")
     })
 
     test("/admin/disponibilidad · robots noindex", async ({ page }) => {

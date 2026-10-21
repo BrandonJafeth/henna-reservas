@@ -26,7 +26,7 @@ export function PlaceLegend({ locations, className }: { locations: Location[]; c
       ))}
       <li className="flex items-center gap-2 text-muted-foreground">
         <span aria-hidden className="size-3.5 rounded-sm border border-dashed border-current" />
-        Horario especial
+        Horario solo de ese día
       </li>
     </ul>
   )
