@@ -171,7 +171,7 @@ export function StepDateTime({ sizes, refreshKey }: { sizes: SizeOption[]; refre
                   className={cn(
                     "tabular h-11 rounded-md border text-[0.9375rem] transition-colors",
                     on
-                      ? "border-primary bg-primary text-primary-foreground"
+                      ? "border-foreground/60 bg-button text-button-foreground font-medium"
                       : "border-input bg-card hover:border-primary hover:text-primary",
                   )}
                 >

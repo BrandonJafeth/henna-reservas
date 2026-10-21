@@ -6,6 +6,8 @@ import { getAllArtists, getAllSizeOptions, getBookings, getLocations, type Booki
 import { PageHeader } from "@/components/admin/page-header"
 import { BookingFilters } from "@/components/bookings/booking-filters"
 import { BookingsView } from "@/components/bookings/bookings-view"
+import { BookingsCalendar } from "@/components/bookings/bookings-calendar"
+import { BookingsViewSwitch, type BookingsViewMode } from "@/components/bookings/bookings-view-switch"
 import { TableSkeleton } from "@/components/admin/table-skeleton"
 import { DATE_PRESETS, STATUS_ORDER, type DatePreset } from "@/lib/domain"
 import { addDaysISO, mondayOf, todayCR } from "@/lib/format"
@@ -54,9 +56,11 @@ async function CitasLoader({ searchParams }: { searchParams: SearchParams }) {
   const artista = str(sp.artista) ?? "todas"
   const lugar = str(sp.lugar) ?? "todos"
   const fecha = (DATE_PRESETS.find((d) => d.value === str(sp.fecha))?.value ?? "proximas") as DatePreset
+  const vista: BookingsViewMode = str(sp.vista) === "calendario" ? "calendario" : "lista"
 
   const [bookings, artists, locations, sizes] = await Promise.all([
-    getBookings({ status: estado, artist_id: artista, location_id: lugar, ...dateRange(fecha) }),
+    // En calendario se navega por fechas dentro del propio calendario: se traen todas.
+    getBookings({ status: estado, artist_id: artista, location_id: lugar, ...(vista === "calendario" ? {} : dateRange(fecha)) }),
     getAllArtists(),
     getLocations(),
     getAllSizeOptions(),
@@ -65,13 +69,23 @@ async function CitasLoader({ searchParams }: { searchParams: SearchParams }) {
 
   return (
     <>
-      <BookingFilters artists={slimArtists} locations={locations} values={{ estado, artista, lugar, fecha }} />
-      <BookingsView
-        bookings={fecha === "pasadas" ? [...bookings].reverse() : bookings}
+      <BookingsViewSwitch value={vista} />
+      <BookingFilters
         artists={slimArtists}
         locations={locations}
-        sizes={sizes}
+        values={{ estado, artista, lugar, fecha }}
+        showDate={vista === "lista"}
       />
+      {vista === "calendario" ? (
+        <BookingsCalendar bookings={bookings} artists={slimArtists} locations={locations} sizes={sizes} />
+      ) : (
+        <BookingsView
+          bookings={fecha === "pasadas" ? [...bookings].reverse() : bookings}
+          artists={slimArtists}
+          locations={locations}
+          sizes={sizes}
+        />
+      )}
     </>
   )
 }

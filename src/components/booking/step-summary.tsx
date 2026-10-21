@@ -6,8 +6,8 @@ import { BrandLabel } from "@/components/brand/brand-label"
 import { Ornament } from "@/components/brand/ornament"
 import { AnimatedCRCRange } from "@/components/shared/animated-money"
 import { byId } from "@/lib/domain"
-import { capitalize, formatCR, formatDuration, formatTimeCR, formatWhatsApp } from "@/lib/format"
-import type { BookingCatalog, WizardInput } from "./wizard-model"
+import { capitalize, formatCR, formatDuration, formatDurationRange, formatTimeCR, formatWhatsApp } from "@/lib/format"
+import type { BookingCatalog, StepId, WizardInput } from "./wizard-model"
 
 export function useSummary(catalog: BookingCatalog) {
   const v = useWatch<WizardInput>() as WizardInput
@@ -17,7 +17,7 @@ export function useSummary(catalog: BookingCatalog) {
   return { v, size, location, artist }
 }
 
-export function StepSummary({ catalog, onEdit }: { catalog: BookingCatalog; onEdit: (step: number) => void }) {
+export function StepSummary({ catalog, onEdit }: { catalog: BookingCatalog; onEdit: (step: StepId) => void }) {
   const { v, size, location, artist } = useSummary(catalog)
   const file = v.reference_image instanceof File ? v.reference_image : null
   const url = useMemo(() => (file ? URL.createObjectURL(file) : undefined), [file])
@@ -25,19 +25,26 @@ export function StepSummary({ catalog, onEdit }: { catalog: BookingCatalog; onEd
     if (url) URL.revokeObjectURL(url)
   }, [url])
 
-  const rows: { label: string; value: React.ReactNode; step: number }[] = [
-    { label: "Tamaño", value: size ? `${size.label} · ${formatDuration(size.duration_minutes)}` : "—", step: 1 },
-    { label: "Lugar", value: location?.name ?? "—", step: 2 },
-    { label: "Artista", value: artist?.full_name ?? "—", step: 2 },
+  const rows: { label: string; value: React.ReactNode; step: StepId }[] = [
+    { label: "Tamaño", value: size?.label ?? "—", step: "tamano" },
+    {
+      label: "Tiempo",
+      value: size
+        ? `Aplicación ${formatDuration(size.duration_minutes)} + secado ${formatDurationRange(catalog.settings.drying_minutes_min, catalog.settings.drying_minutes_max)}`
+        : "—",
+      step: "tamano",
+    },
+    { label: "Lugar", value: location?.name ?? "—", step: "lugar" },
+    { label: "Artista", value: artist?.full_name ?? "—", step: "lugar" },
     {
       label: "Fecha y hora",
       value: v.starts_at ? `${capitalize(formatCR(v.starts_at, "EEEE d 'de' MMMM"))}, ${formatTimeCR(v.starts_at)}` : "—",
-      step: 3,
+      step: "fecha",
     },
-    { label: "Nombre", value: `${v.first_name} ${v.last_name}`.trim() || "—", step: 4 },
-    { label: "WhatsApp", value: v.whatsapp ? formatWhatsApp(v.whatsapp) : "—", step: 4 },
-    ...(v.email ? [{ label: "Correo", value: v.email, step: 4 }] : []),
-    ...(v.allergies ? [{ label: "Piel", value: v.allergies, step: 4 }] : []),
+    { label: "Nombre", value: `${v.first_name} ${v.last_name}`.trim() || "—", step: "datos" },
+    { label: "WhatsApp", value: v.whatsapp ? formatWhatsApp(v.whatsapp) : "—", step: "datos" },
+    ...(v.email ? [{ label: "Correo", value: v.email, step: "datos" as const }] : []),
+    ...(v.allergies ? [{ label: "Piel", value: v.allergies, step: "datos" as const }] : []),
   ]
 
   return (
@@ -64,7 +71,7 @@ export function StepSummary({ catalog, onEdit }: { catalog: BookingCatalog; onEd
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <p className="font-medium">Diseño enviado</p>
           <p className="line-clamp-2 text-sm text-muted-foreground">{v.notes || "Sin notas adicionales."}</p>
-          <button type="button" onClick={() => onEdit(0)} className="w-fit text-sm text-primary underline underline-offset-4 hover:no-underline">
+          <button type="button" onClick={() => onEdit("diseno")} className="w-fit text-sm text-primary underline underline-offset-4 hover:no-underline">
             Cambiar diseño
           </button>
         </div>

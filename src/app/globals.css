@@ -3,49 +3,36 @@
 @import "shadcn/tailwind.css";
 
 /*
- * K&K Henna Artistry · tokens de diseño
+ * K&K Henna Artistry · tokens de diseño (solo modo claro)
  * ------------------------------------------------------------------
- * Fuente de verdad del color, la tipografía y el radio. Ningún
- * componente usa colores literales: todo pasa por estas variables.
+ * Paleta neutra: blanco hueso, beige y gris cálido. Los botones
+ * principales son beige con texto oscuro. Ningún componente usa
+ * colores literales: todo pasa por estas variables.
  *
- * Contraste WCAG 2.2 (calculado con la fórmula de luminancia relativa).
+ * Contraste WCAG 2.2 (fórmula de luminancia relativa).
  * AA exige 4.5:1 texto normal · 3:1 texto grande y componentes.
  *
- * CLARO
- *   foreground  #2B1D17 / background #F5EFE8 ... 14.25:1  AAA
- *   foreground  #2B1D17 / card       #FBF8F3 ... 15.36:1  AAA
- *   foreground  #2B1D17 / muted      #EDE3D8 ... 12.84:1  AAA
- *   muted-fg    #6B5447 / background ...........  6.16:1  AA
- *   muted-fg    #6B5447 / card ................  6.64:1  AA
- *   muted-fg    #6B5447 / muted ...............  5.56:1  AA
- *   primary     #8A5A3C / background (texto) ...  5.10:1  AA
- *   primary     #8A5A3C / card (texto) .........  5.49:1  AA
- *   primary     #8A5A3C / muted (texto) ........  4.59:1  AA
- *   primary-fg  #FBF8F3 / primary .............  5.49:1  AA
- *   success     #4F6B4C / background ...........  5.20:1  AA (era #5E7A5A: 4.17, no pasaba)
- *   warning     #8C6220 / background ...........  4.74:1  AA (era #A0712A: 3.76, no pasaba)
- *   destructive #A3442F / background ...........  5.37:1  AA
- *   input       #977C6C / background ...........  3.40:1  componente (1.4.11)
- *   input       #977C6C / card ................  3.66:1  componente (1.4.11)
- *   ring        #8A5A3C / background ...........  5.10:1  componente
- *   accent      #B98A6E / background ...........  2.66:1  SOLO DECORATIVO, nunca texto
- *   border      #E3D3C6 / background ...........  1.28:1  SOLO DECORATIVO (divisiones)
- *
- * OSCURO
- *   foreground  #F2E8DE / background #1E1512 ... 14.83:1  AAA
- *   foreground  #F2E8DE / card       #2A1F1A ... 13.27:1  AAA
- *   muted-fg    #C4AE9F / card ................  7.56:1  AAA
- *   muted-fg    #C4AE9F / muted      #33261F ...  6.89:1  AA
- *   primary     #D9A27F / card (texto) .........  7.20:1  AAA
- *   primary-fg  #1E1512 / primary .............  8.05:1  AAA
- *   success     #9DBB97 / card ................  7.63:1  AAA
- *   warning     #DDAA5C / card ................  7.62:1  AAA
- *   destructive #E58A73 / card ................  6.27:1  AA
- *   input       #806A5D / card ................  3.16:1  componente
- *   accent      #B98A6E / card ................  5.29:1  decorativo (pasa, pero no se usa en texto)
+ *   foreground        #2B2825 / background #F6F3EE ... 13.24:1  AAA
+ *   foreground        #2B2825 / card       #FCFBF8 ... 14.16:1  AAA
+ *   foreground        #2B2825 / muted      #EEE9E1 ... 12.13:1  AAA
+ *   muted-foreground  #6A645D / background ...........  5.28:1  AA
+ *   muted-foreground  #6A645D / card ................  5.65:1  AA
+ *   muted-foreground  #6A645D / muted ...............  4.84:1  AA
+ *   primary (texto)   #5E564D / background ...........  6.51:1  AA
+ *   primary (texto)   #5E564D / muted ...............  5.96:1  AA
+ *   primary-fg        #FCFBF8 / primary .............  6.96:1  AA
+ *   button-fg         #2B2825 / button     #E6DACA ... 10.64:1  AAA
+ *   button-fg         #2B2825 / button-hover #DCCDB9 .  9.40:1  AAA
+ *   success           #4F6B4C / background ...........  5.36:1  AA
+ *   warning           #8C6220 / background ...........  4.89:1  AA
+ *   destructive       #A03E3E / background ...........  5.83:1  AA
+ *   input (borde)     #8C8277 / background ...........  3.40:1  componente (1.4.11)
+ *   input (borde)     #8C8277 / card ................  3.64:1  componente (1.4.11)
+ *   ring              #5E564D / background ...........  6.51:1  componente
+ *   accent            #CDBFAD / background ...........  1.63:1  SOLO DECORATIVO (bordes de tarjeta, separadores)
+ *   border            #E4DDD3 / background ...........  1.22:1  SOLO DECORATIVO (divisiones)
+ *   El botón beige se identifica por su texto (10.64:1); su borde es decorativo.
  */
-
-@custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
   --color-background: var(--background);
@@ -63,6 +50,10 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-button: var(--button);
+  --color-button-foreground: var(--button-foreground);
+  --color-button-hover: var(--button-hover);
+  --color-button-border: var(--button-border);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-border: var(--border);
@@ -105,103 +96,61 @@
 :root {
   --radius: 8px;
 
-  --background: #f5efe8;
-  --foreground: #2b1d17;
-  --card: #fbf8f3;
-  --card-foreground: #2b1d17;
-  --popover: #fbf8f3;
-  --popover-foreground: #2b1d17;
-  --primary: #8a5a3c;
-  --primary-foreground: #fbf8f3;
-  --secondary: #ede3d8;
-  --secondary-foreground: #2b1d17;
-  --muted: #ede3d8;
-  --muted-foreground: #6b5447;
-  --accent: #b98a6e; /* decorativo: bordes, separadores, iconos de adorno */
-  --accent-foreground: #2b1d17;
-  --destructive: #a3442f;
+  --background: #f6f3ee;
+  --foreground: #2b2825;
+  --card: #fcfbf8;
+  --card-foreground: #2b2825;
+  --popover: #fcfbf8;
+  --popover-foreground: #2b2825;
+  /* Neutro oscuro para texto de acento, enlaces, foco y selección */
+  --primary: #5e564d;
+  --primary-foreground: #fcfbf8;
+  /* Botones principales: beige */
+  --button: #e6daca;
+  --button-hover: #dccdb9;
+  --button-foreground: #2b2825;
+  --button-border: #bfae97;
+  --secondary: #eee9e1;
+  --secondary-foreground: #2b2825;
+  --muted: #eee9e1;
+  --muted-foreground: #6a645d;
+  --accent: #cdbfad; /* decorativo: bordes de tarjeta, separadores, ilustraciones */
+  --accent-foreground: #2b2825;
+  --destructive: #a03e3e;
   --success: #4f6b4c;
   --warning: #8c6220;
-  --border: #e3d3c6;
-  --input: #977c6c;
-  --ring: #8a5a3c;
+  --border: #e4ddd3;
+  --input: #8c8277;
+  --ring: #5e564d;
 
   /* Tonos de lugar: fondo de bloque + tinta. Se asignan por orden de lugar, no por nombre. */
-  --place-1: #ead6c6;
-  --place-1-ink: #6a3f25;
-  --place-2: #dbe2d4;
+  --place-1: #eae0d2;
+  --place-1-ink: #5a4e40;
+  --place-2: #dfe5da;
   --place-2-ink: #3f5a3c;
-  --place-3: #e7dcc2;
-  --place-3-ink: #6b5017;
+  --place-3: #e3e1dd;
+  --place-3-ink: #4a4744;
 
-  --chart-1: #8a5a3c;
-  --chart-2: #4f6b4c;
-  --chart-3: #b98a6e;
+  --chart-1: #8c8073;
+  --chart-2: #6f8a6b;
+  --chart-3: #cdbfad;
   --chart-4: #8c6220;
-  --chart-5: #6b5447;
+  --chart-5: #6a645d;
 
-  --sidebar: #fbf8f3;
-  --sidebar-foreground: #2b1d17;
-  --sidebar-primary: #8a5a3c;
-  --sidebar-primary-foreground: #fbf8f3;
-  --sidebar-accent: #ede3d8;
-  --sidebar-accent-foreground: #2b1d17;
-  --sidebar-border: #e3d3c6;
-  --sidebar-ring: #8a5a3c;
+  --sidebar: #fcfbf8;
+  --sidebar-foreground: #2b2825;
+  --sidebar-primary: #5e564d;
+  --sidebar-primary-foreground: #fcfbf8;
+  --sidebar-accent: #eee9e1;
+  --sidebar-accent-foreground: #2b2825;
+  --sidebar-border: #e4ddd3;
+  --sidebar-ring: #5e564d;
 
   color-scheme: light;
 }
 
-.dark {
-  --background: #1e1512;
-  --foreground: #f2e8de;
-  --card: #2a1f1a;
-  --card-foreground: #f2e8de;
-  --popover: #2a1f1a;
-  --popover-foreground: #f2e8de;
-  --primary: #d9a27f;
-  --primary-foreground: #1e1512;
-  --secondary: #33261f;
-  --secondary-foreground: #f2e8de;
-  --muted: #33261f;
-  --muted-foreground: #c4ae9f;
-  --accent: #b98a6e;
-  --accent-foreground: #f2e8de;
-  --destructive: #e58a73;
-  --success: #9dbb97;
-  --warning: #ddaa5c;
-  --border: #4a3830;
-  --input: #806a5d;
-  --ring: #d9a27f;
-
-  --place-1: #4a3226;
-  --place-1-ink: #f0c9ad;
-  --place-2: #34402f;
-  --place-2-ink: #c5dbbf;
-  --place-3: #463b22;
-  --place-3-ink: #ead198;
-
-  --chart-1: #d9a27f;
-  --chart-2: #9dbb97;
-  --chart-3: #b98a6e;
-  --chart-4: #ddaa5c;
-  --chart-5: #c4ae9f;
-
-  --sidebar: #241a16;
-  --sidebar-foreground: #f2e8de;
-  --sidebar-primary: #d9a27f;
-  --sidebar-primary-foreground: #1e1512;
-  --sidebar-accent: #33261f;
-  --sidebar-accent-foreground: #f2e8de;
-  --sidebar-border: #4a3830;
-  --sidebar-ring: #d9a27f;
-
-  color-scheme: dark;
-}
-
 /* Sileo: estados con la paleta de la marca */
-:root,
-.dark {
+:root {
   --sileo-state-success: var(--success);
   --sileo-state-error: var(--destructive);
   --sileo-state-warning: var(--warning);
@@ -301,4 +250,166 @@
 }
 .kk-slide span[style*="overflow-y"] {
   line-height: 1.35 !important;
+}
+
+/* ------------------------------------------------------------------
+ * Schedule-X con la paleta de la marca (solo dentro de .sx-kk)
+ * ------------------------------------------------------------------ */
+.sx-kk {
+  --sx-color-primary: var(--primary);
+  --sx-color-on-primary: var(--primary-foreground);
+  --sx-color-primary-container: var(--button);
+  --sx-color-on-primary-container: var(--button-foreground);
+  --sx-color-secondary: var(--muted-foreground);
+  --sx-color-on-secondary: var(--card);
+  --sx-color-secondary-container: var(--muted);
+  --sx-color-on-secondary-container: var(--foreground);
+  --sx-color-surface: var(--card);
+  --sx-color-surface-dim: var(--muted);
+  --sx-color-surface-bright: var(--card);
+  --sx-color-on-surface: var(--foreground);
+  --sx-color-surface-container: var(--muted);
+  --sx-color-surface-container-low: var(--background);
+  --sx-color-surface-container-high: var(--muted);
+  --sx-color-background: var(--card);
+  --sx-color-on-background: var(--foreground);
+  --sx-color-outline: var(--input);
+  --sx-color-outline-variant: var(--border);
+  --sx-color-surface-tint: var(--primary);
+  --sx-internal-color-text: var(--foreground);
+  --sx-internal-color-gray-ripple-background: var(--muted);
+  --sx-internal-color-light-gray: var(--background);
+  --sx-rounding-extra-small: 4px;
+  --sx-rounding-small: 6px;
+  --sx-rounding-extra-large: 8px;
+  --sx-box-shadow-level3: 0 8px 24px -8px color-mix(in oklab, var(--foreground) 22%, transparent);
+  --sx-border: 1px solid var(--border);
+  font-family: var(--font-sans);
+  /* Contexto de apilamiento propio: los z-index internos de Schedule-X
+     (encabezado de semana = 100) no quedan por encima de modales ni barras. */
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+}
+.sx-kk .sx-react-calendar-wrapper {
+  width: 100%;
+  height: auto;
+}
+/* El número del día va por encima del rayado de "día libre" */
+.sx-kk .sx__month-grid-day__header {
+  position: relative;
+  z-index: 1;
+}
+.sx-kk .sx__calendar-wrapper {
+  border: 1px solid color-mix(in oklab, var(--accent) 45%, transparent);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.sx-kk .sx__calendar {
+  border: 0;
+}
+.sx-kk .sx__month-grid-day__header-day-name,
+.sx-kk .sx__week-grid__day-name {
+  color: var(--muted-foreground);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+}
+.sx-kk .sx__range-heading {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Número de día: botón real para elegir días */
+.sx-kk .sx-kk-date {
+  display: inline-flex;
+  min-width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  background: transparent;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.sx-kk button.sx-kk-date:hover:not(:disabled) {
+  border-color: var(--input);
+}
+.sx-kk button.sx-kk-date:disabled {
+  color: color-mix(in oklab, var(--muted-foreground) 70%, transparent);
+  cursor: default;
+}
+.sx-kk .sx-kk-date[data-selected] {
+  background: var(--foreground);
+  color: var(--card);
+  font-weight: 500;
+}
+.sx-kk .sx__is-today .sx-kk-date:not([data-selected]) {
+  border-color: var(--foreground);
+}
+.sx-kk .sx__month-grid-day:has(.sx-kk-date[data-selected]) {
+  background: color-mix(in oklab, var(--button) 55%, transparent);
+}
+.sx-kk .sx__month-grid-day.is-leading-or-trailing {
+  background: color-mix(in oklab, var(--muted) 40%, transparent);
+}
+
+/* Eventos del mes */
+.sx-kk .sx-kk-event {
+  display: flex;
+  min-width: 0;
+  gap: 0.35rem;
+  padding: 1px 4px;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.sx-kk .sx-kk-event.is-dashed {
+  outline: 1px dashed currentColor;
+  outline-offset: -1px;
+  border-radius: 4px;
+}
+.sx-kk .sx-kk-event__time {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.sx-kk .sx-kk-event__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+@media (max-width: 640px) {
+  .sx-kk .sx-kk-event__time {
+    display: none;
+  }
+  .sx-kk .sx-kk-date {
+    min-width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* Schedule-X: accesibilidad (contraste y tamaño de objetivos) */
+.sx-kk .sx__week-grid__date-number,
+.sx-kk .sx__week-grid__hour-text,
+.sx-kk .sx__month-grid-day__header-day-name,
+.sx-kk .sx__week-grid__day-name {
+  color: var(--muted-foreground);
+}
+.sx-kk .sx__date-input-chevron-wrapper {
+  min-width: 24px;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.sx-kk .sx__month-grid-event {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
 }

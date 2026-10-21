@@ -22,7 +22,6 @@ import { StatusBadge } from "@/components/brand/status-badge"
 import { EmptyState, ErrorState } from "@/components/brand/states"
 import { ActionButton, type ActionState } from "@/components/shared/action-button"
 import { AnimatedCRC, AnimatedCRCRange } from "@/components/shared/animated-money"
-import { ThemeToggle } from "@/components/admin/theme-toggle"
 import { STATUS_ORDER } from "@/lib/domain"
 
 /* ---------- contraste calculado sobre los tokens resueltos ---------- */
@@ -57,8 +56,9 @@ const PAIRS: { fg: string; bg: string; use: string; min: number; decorative?: bo
   { fg: "--foreground", bg: "--card", use: "Texto en tarjetas", min: 4.5 },
   { fg: "--muted-foreground", bg: "--background", use: "Texto secundario", min: 4.5 },
   { fg: "--muted-foreground", bg: "--card", use: "Secundario en tarjeta", min: 4.5 },
-  { fg: "--primary", bg: "--background", use: "Etiquetas y enlaces", min: 4.5 },
-  { fg: "--primary-foreground", bg: "--primary", use: "Botón primario", min: 4.5 },
+  { fg: "--primary", bg: "--background", use: "Etiquetas, enlaces y foco", min: 4.5 },
+  { fg: "--button-foreground", bg: "--button", use: "Botón principal (beige)", min: 4.5 },
+  { fg: "--primary-foreground", bg: "--primary", use: "Texto sobre neutro oscuro", min: 4.5 },
   { fg: "--success", bg: "--background", use: "Confirmada / ingreso", min: 4.5 },
   { fg: "--warning", bg: "--background", use: "Pendiente", min: 4.5 },
   { fg: "--destructive", bg: "--background", use: "Cancelada / egreso", min: 4.5 },
@@ -76,9 +76,7 @@ function Palette() {
       setRows(PAIRS.map((p) => ({ fg: s.getPropertyValue(p.fg).trim(), bg: s.getPropertyValue(p.bg).trim(), r: ratio(s.getPropertyValue(p.fg).trim(), s.getPropertyValue(p.bg).trim()) })))
     }
     read()
-    const o = new MutationObserver(read)
-    o.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] })
-    return () => o.disconnect()
+
   }, [])
 
   return (
@@ -154,13 +152,12 @@ export function DesignShowcase() {
         <Ornament />
         <h1 className="font-display text-5xl">Sistema de diseño</h1>
         <p className="max-w-lg text-muted-foreground">Tokens, tipografía y componentes de K&amp;K Henna Artistry. Página solo para desarrollo.</p>
-        <ThemeToggle showLabel />
       </header>
 
       <Section id="s-paleta" title="Paleta y contraste">
-        <p className="text-sm text-muted-foreground">Calculado en vivo sobre los tokens del tema actual. Cambiá el tema para revisar el modo oscuro.</p>
+        <p className="text-sm text-muted-foreground">Calculado en vivo sobre los tokens resueltos. El sistema usa solo modo claro.</p>
         <div className="flex flex-wrap gap-3">
-          {["--background", "--card", "--muted", "--foreground", "--muted-foreground", "--primary", "--accent", "--border", "--input", "--success", "--warning", "--destructive", "--place-1", "--place-2"].map((t) => (
+          {["--background", "--card", "--muted", "--foreground", "--muted-foreground", "--primary", "--button", "--button-hover", "--accent", "--border", "--input", "--success", "--warning", "--destructive", "--place-1", "--place-2"].map((t) => (
             <div key={t} className="flex w-28 flex-col gap-1.5">
               <span className="h-14 rounded-md border border-border" style={{ background: `var(${t})` }} />
               <span className="font-mono text-[0.6875rem] text-muted-foreground">{t}</span>

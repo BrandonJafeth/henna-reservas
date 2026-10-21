@@ -4,10 +4,9 @@ import { test } from "@playwright/test"
 
 const OUT = process.env.SHOTS_DIR ?? "docs/capturas"
 
-for (const theme of ["light", "dark"] as const) {
-  test(`capturas ${theme}`, async ({ page }, info) => {
-    await page.addInitScript((t) => localStorage.setItem("kk-theme", t), theme)
-    const tag = `${info.project.name}-${theme}`
+{
+  test("capturas", async ({ page }, info) => {
+    const tag = info.project.name
 
     await page.goto("/reservar")
     await page.getByRole("heading", { name: "Tu diseño" }).waitFor()
@@ -31,12 +30,29 @@ for (const theme of ["light", "dark"] as const) {
     await page.screenshot({ path: `${OUT}/reservar-2-${tag}.png`, fullPage: true })
 
     await page.goto("/admin/disponibilidad")
-    await page.getByRole("heading", { name: "Lunes" }).waitFor()
+    await page.getByRole("heading", { name: "Elegí días en el calendario" }).waitFor()
+    await page.waitForTimeout(600)
+    await page.screenshot({ path: `${OUT}/disponibilidad-${tag}.png`, fullPage: true })
+    const days = page.locator("button.sx-kk-date:not([disabled])")
+    await days.nth(2).click()
+    await days.nth(4).click()
     await page.waitForTimeout(400)
-    await page.screenshot({ path: `${OUT}/disponibilidad-semanal-${tag}.png`, fullPage: true })
-    await page.getByRole("tab", { name: "Calendario" }).click()
-    await page.getByRole("button", { name: "Semana siguiente" }).waitFor()
+    await page.screenshot({ path: `${OUT}/disponibilidad-seleccion-${tag}.png`, fullPage: true })
+    await page.getByRole("switch", { name: "Ver a todas las artistas" }).click()
     await page.waitForTimeout(400)
-    await page.screenshot({ path: `${OUT}/disponibilidad-calendario-${tag}.png`, fullPage: true })
+    await page.screenshot({ path: `${OUT}/disponibilidad-equipo-${tag}.png`, fullPage: true })
+
+    await page.goto("/admin/citas?vista=calendario")
+    await page.getByRole("region", { name: "Calendario de citas" }).waitFor()
+    await page.waitForTimeout(900)
+    await page.screenshot({ path: `${OUT}/citas-calendario-${tag}.png`, fullPage: true })
+
+    await page.goto("/admin/citas?fecha=todas")
+    await page.getByRole("heading", { name: "Citas", level: 1 }).waitFor()
+    await page.waitForTimeout(900)
+    await page.getByRole("button", { name: /Natalia/ }).first().click()
+    await page.getByRole("dialog").waitFor()
+    await page.waitForTimeout(500)
+    await page.screenshot({ path: `${OUT}/citas-detalle-${tag}.png` })
   })
 }

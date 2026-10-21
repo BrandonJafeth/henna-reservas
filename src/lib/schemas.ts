@@ -30,39 +30,20 @@ export const bookingRequestSchema = bookingDetailsSchema.extend({
 })
 export type BookingRequest = z.infer<typeof bookingRequestSchema>
 
-export const weeklyBlockSchema = z
+export const availabilityRangeSchema = z
   .object({
-    id: z.string().optional(),
     artist_id: z.string().min(1),
-    weekday: z.coerce.number().int().min(0).max(6),
+    dates: z.array(z.iso.date()).min(1, "Elegí al menos un día"),
     start_time: time,
     end_time: time,
     location_id: z.string().min(1, "Elegí un lugar"),
+    repeat: z.enum(["once", "weekly"]),
   })
   .refine((v) => v.end_time > v.start_time, {
     path: ["end_time"],
     message: "La hora de fin debe ser después del inicio",
   })
-export type WeeklyBlockInput = z.input<typeof weeklyBlockSchema>
-
-export const overrideSchema = z
-  .object({
-    id: z.string().optional(),
-    artist_id: z.string().min(1),
-    date: z.iso.date("Elegí una fecha"),
-    is_day_off: z.boolean(),
-    location_id: z.string().nullable(),
-    start_time: time.nullable(),
-    end_time: time.nullable(),
-    note: z.string().max(140).nullable(),
-  })
-  .superRefine((v, ctx) => {
-    if (v.is_day_off) return
-    if (!v.location_id) ctx.addIssue({ code: "custom", path: ["location_id"], message: "Elegí un lugar" })
-    if (!v.start_time || !v.end_time || v.end_time <= v.start_time)
-      ctx.addIssue({ code: "custom", path: ["end_time"], message: "La hora de fin debe ser después del inicio" })
-  })
-export type OverrideInput = z.input<typeof overrideSchema>
+export type AvailabilityRangeInput = z.input<typeof availabilityRangeSchema>
 
 export const cashMovementSchema = z.object({
   type: z.enum(["ingreso", "egreso"]),
@@ -93,6 +74,11 @@ export const settingsSchema = z.object({
   min_notice_hours: z.coerce.number().int().min(0).max(168),
   buffer_minutes: z.coerce.number().int().min(0).max(120),
   slot_interval_minutes: z.coerce.number().int().min(10).max(120),
+  drying_minutes_min: z.coerce.number().int().min(0).max(600),
+  drying_minutes_max: z.coerce.number().int().min(0).max(600),
+}).refine((v) => v.drying_minutes_max >= v.drying_minutes_min, {
+  path: ["drying_minutes_max"],
+  message: "El secado máximo debe ser mayor o igual al mínimo",
 })
 
 export const loginSchema = z.object({

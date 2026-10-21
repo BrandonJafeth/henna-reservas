@@ -9,7 +9,7 @@ export type ActionState = "idle" | "loading" | "success"
 
 /**
  * Botón con estado de carga → confirmación ("Reservar", "Guardar").
- * Mantiene el ancho al cambiar de estado y anuncia el cambio.
+ * Mantiene el ancho al cambiar de estado; el resultado se anuncia con toasts.
  */
 export function ActionButton({
   state,
@@ -31,17 +31,17 @@ export function ActionButton({
       {...props}
       disabled={disabled}
       aria-disabled={busy || undefined}
+      aria-busy={state === "loading" || undefined}
       data-state={state}
       onClick={busy ? (e) => e.preventDefault() : props.onClick}
       className={cn("relative overflow-hidden", state === "success" && "bg-success text-primary-foreground hover:bg-success", className)}
     >
-      <span className="sr-only" aria-live="polite">
-        {state === "loading" ? loadingLabel : state === "success" ? successLabel : ""}
-      </span>
+      {/* Sin aria-live aquí: el resultado lo anuncian los toasts de Sileo. */}
+      {busy && <span className="sr-only">{state === "loading" ? loadingLabel : successLabel}</span>}
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.span
           key={state}
-          aria-hidden={busy}
+          aria-hidden={busy || undefined}
           className="inline-flex items-center gap-2"
           initial={{ y: 14, opacity: 0, filter: "blur(4px)" }}
           animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}

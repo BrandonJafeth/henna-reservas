@@ -19,8 +19,8 @@ export const mockArtists: Profile[] = [
     is_active: true,
   },
   {
-    id: "art-karla",
-    full_name: "Karla Méndez",
+    id: "art-katheryn",
+    full_name: "Katheryn Mendez",
     role: "tatuadora",
     commission_rate: 0.6,
     avatar_url: null,
@@ -41,4 +41,6 @@ export const mockSettings: Settings = {
   min_notice_hours: 24,
   buffer_minutes: 15,
   slot_interval_minutes: 30,
+  drying_minutes_min: 120,
+  drying_minutes_max: 180,
 }

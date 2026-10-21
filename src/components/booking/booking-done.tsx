@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Logo } from "@/components/brand/logo"
 import { Ornament } from "@/components/brand/ornament"
 import { JaguaBranch } from "@/components/brand/illustrations"
-import { capitalize, formatCR, formatCRCRange, formatTimeCR, formatWhatsApp } from "@/lib/format"
+import { capitalize, formatCR, formatCRCRange, formatDurationRange, formatTimeCR, formatWhatsApp } from "@/lib/format"
 import { useSummary } from "./step-summary"
 import type { BookingCatalog } from "./wizard-model"
 
@@ -57,6 +57,10 @@ export function BookingDone({ catalog, onRestart }: { catalog: BookingCatalog; o
       <div className="mt-10 max-w-sm text-left">
         <p className="font-display text-xl">Mientras tanto</p>
         <ul className="mt-3 space-y-2 text-[0.9375rem] text-muted-foreground">
+          <li>
+            Dejá libres unas {formatDurationRange(catalog.settings.drying_minutes_min, catalog.settings.drying_minutes_max)} después de
+            la cita: el gel necesita secar sin mojarse ni rozarse.
+          </li>
           <li>El diseño se ve claro al inicio y oscurece en las primeras 24–48 h.</li>
           <li>Dura de 1 a 2 semanas. Evitá el agua en la zona las primeras horas.</li>
         </ul>

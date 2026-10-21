@@ -111,7 +111,7 @@ export function StepPlace({
                         aria-hidden
                         className={cn(
                           "flex size-11 shrink-0 items-center justify-center rounded-full border border-accent/60 font-display text-lg text-primary transition-colors",
-                          "group-has-[[data-state=checked]]:border-primary group-has-[[data-state=checked]]:bg-primary group-has-[[data-state=checked]]:text-primary-foreground",
+                          "group-has-[[data-state=checked]]:border-foreground/60 group-has-[[data-state=checked]]:bg-button group-has-[[data-state=checked]]:text-button-foreground",
                         )}
                       >
                         {initials(a.full_name)}

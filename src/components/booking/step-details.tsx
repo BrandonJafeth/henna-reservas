@@ -14,6 +14,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import type { Settings } from "@/types/database"
+import { formatDurationRange } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import { describedBy, FieldError, FieldHint } from "./field-message"
 import { fieldId, type WizardField, type WizardInput } from "./wizard-model"
@@ -53,7 +55,8 @@ function TextField({
   )
 }
 
-export function StepDetails() {
+export function StepDetails({ settings }: { settings: Settings }) {
+  const drying = formatDurationRange(settings.drying_minutes_min, settings.drying_minutes_max)
   const { register, control, formState } = useFormContext<WizardInput>()
   const waId = fieldId("whatsapp")
   const waError = formState.errors.whatsapp?.message
@@ -131,6 +134,7 @@ export function StepDetails() {
           body={
             <ul className="list-disc space-y-2 pl-5">
               <li>La jagua es un tinte natural del fruto del guaitil. No es tinta permanente.</li>
+              <li>Después de aplicarlo, el gel necesita {drying} para secar. Planificá tu día para no mojarlo ni rozarlo.</li>
               <li>El diseño se ve claro al inicio y oscurece en las primeras 24–48 h.</li>
               <li>Dura de 1 a 2 semanas, según tu piel y la zona.</li>
               <li>Evitá el agua y las cremas en la zona durante las primeras horas.</li>

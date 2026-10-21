@@ -13,7 +13,7 @@ import type { BookingCatalog } from "./wizard-model"
  * Columna de marca. En celular es un encabezado compacto; en escritorio
  * queda fija a la izquierda y va armando el resumen de la reserva.
  */
-export function BookingAside({ catalog, step }: { catalog: BookingCatalog; step: number }) {
+export function BookingAside({ catalog }: { catalog: BookingCatalog }) {
   const { v, size, location, artist } = useSummary(catalog)
   const rows = [
     { label: "Diseño", value: v.reference_image ? "Foto lista" : null },
@@ -27,7 +27,7 @@ export function BookingAside({ catalog, step }: { catalog: BookingCatalog; step:
   ]
 
   return (
-    <header className="flex flex-col items-center pt-8 pb-6 text-center lg:sticky lg:top-0 lg:h-dvh lg:items-start lg:justify-center lg:py-16 lg:text-left">
+    <header className="flex flex-col items-center pt-8 pb-6 text-center lg:sticky lg:top-0 lg:h-dvh lg:justify-center lg:py-16">
       <Logo size="sm" className="lg:hidden" />
       <Logo size="lg" className="hidden lg:inline-flex" />
       <Ornament width="sm" className="mt-5 lg:mt-8" />
@@ -35,7 +35,7 @@ export function BookingAside({ catalog, step }: { catalog: BookingCatalog; step:
       <p className="mt-3 max-w-sm text-[1.0625rem] text-muted-foreground lg:text-lg">
         Arte en la piel con tinta de jagua, diseñado y aplicado a mano.
       </p>
-      <ul className="mt-4 hidden flex-col gap-1.5 text-[0.9375rem] lg:flex">
+      <ul className="mt-4 hidden flex-col items-center gap-1.5 text-[0.9375rem] lg:flex">
         <li className="flex items-center gap-2.5">
           <span aria-hidden className="size-1 rounded-full bg-accent" />
           Dura de 1 a 2 semanas
@@ -49,7 +49,6 @@ export function BookingAside({ catalog, step }: { catalog: BookingCatalog; step:
       <section
         aria-label="Tu reserva hasta ahora"
         className="mt-10 hidden w-full max-w-sm rounded-lg border border-accent/45 bg-card p-6 lg:block"
-        data-step={step}
       >
         <BrandLabel as="h2" className="text-center">
           Tu reserva

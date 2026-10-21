@@ -21,46 +21,69 @@ import { StepPlace } from "./step-place"
 import { StepSize } from "./step-size"
 import { StepSummary, useSummary } from "./step-summary"
 import {
+  bookingStepper,
   DEFAULT_VALUES,
   fieldId,
-  STEPS,
+  pickStepValues,
+  toBookingRequest,
   wizardSchema,
   type BookingCatalog,
+  type BookingStepper,
+  type StepId,
+  type WizardField,
   type WizardInput,
   type WizardOutput,
 } from "./wizard-model"
 
-const LAST = STEPS.length - 1
-
 export function BookingWizard({ catalog }: { catalog: BookingCatalog }) {
+  // Un solo formulario para todo el flujo: el panel lateral y el resumen
+  // leen los valores en vivo. Stepperize maneja la navegación y guarda una
+  // copia tipada de los datos de cada paso al salir de él.
   const methods = useForm<WizardInput, unknown, WizardOutput>({
     resolver: zodResolver(wizardSchema),
     defaultValues: DEFAULT_VALUES,
     mode: "onTouched",
     shouldFocusError: false,
   })
-  const [step, setStep] = useState(0)
-  const [furthest, setFurthest] = useState(0)
   const [direction, setDirection] = useState(1)
   const [submitState, setSubmitState] = useState<ActionState>("idle")
   const [slotsKey, setSlotsKey] = useState(0)
   const [done, setDone] = useState(false)
   const headingRef = useRef<HTMLHeadingElement>(null)
   const firstRender = useRef(true)
+  /** Paso que bloqueó la última navegación, para llevar el foco a su error. */
+  const blockedBy = useRef<StepId | null>(null)
+
+  const stepper = bookingStepper.useStepper({
+    // Antes de avanzar (con "Continuar" o saltando desde el progreso) se
+    // validan con RHF todos los pasos que se dejan atrás. Volver siempre se permite.
+    beforeStepChange: async (ctx) => {
+      if (ctx.toIndex <= ctx.fromIndex) return true
+      for (const step of bookingStepper.steps.slice(ctx.fromIndex, ctx.toIndex)) {
+        if (!step.fields.length) continue
+        if (!(await methods.trigger(step.fields))) {
+          blockedBy.current = step.id
+          return false
+        }
+      }
+      return true
+    },
+    onStepChange: (_step, ctx) => setDirection(ctx.toIndex >= ctx.fromIndex ? 1 : -1),
+  })
 
   // Un error ya visible se borra mientras se corrige (no recién en el blur),
-  // así el layout no salta bajo el puntero. Los errores nuevos siguen
-  // apareciendo en blur o al tocar "Continuar".
+  // así el layout no salta bajo el puntero.
   useEffect(() => {
     return methods.subscribe({
       formState: { values: true },
       callback: ({ name }) => {
-        const field = name as keyof WizardInput | undefined
+        const field = name as WizardField | undefined
         if (field && methods.getFieldState(field).error) void methods.trigger(field)
       },
     })
   }, [methods])
 
+  // Foco al título de cada paso nuevo.
   useEffect(() => {
     if (firstRender.current) {
       firstRender.current = false
@@ -68,15 +91,9 @@ export function BookingWizard({ catalog }: { catalog: BookingCatalog }) {
     }
     headingRef.current?.focus({ preventScroll: true })
     headingRef.current?.scrollIntoView({ block: "start", behavior: "smooth" })
-  }, [step])
+  }, [stepper.id])
 
-  function go(to: number) {
-    setDirection(to > step ? 1 : -1)
-    setStep(to)
-    setFurthest((f) => Math.max(f, to))
-  }
-
-  function focusFirstError(fields: readonly (keyof WizardInput)[]) {
+  function focusFirstError(fields: readonly WizardField[]) {
     for (const f of fields) {
       if (methods.getFieldState(f).error) {
         const el = document.getElementById(fieldId(f))
@@ -87,34 +104,42 @@ export function BookingWizard({ catalog }: { catalog: BookingCatalog }) {
     }
   }
 
-  async function next() {
-    const fields = STEPS[step]!.fields
-    const ok = fields.length ? await methods.trigger(fields) : true
-    if (!ok) {
-      focusFirstError(fields)
-      return
+  /** Navega guardando los datos del paso actual; si un paso no valida, lleva a él y a su primer error. */
+  async function move(action: (payload: { data: Partial<WizardInput>; complete?: boolean }) => ReturnType<BookingStepper["next"]>, forward: boolean) {
+    blockedBy.current = null
+    const data = pickStepValues(methods.getValues(), stepper.id)
+    const result = await action(forward ? { data, complete: true } : { data })
+    if (result.accepted || result.reason !== "guard" || !blockedBy.current) return
+    const target = blockedBy.current
+    if (target !== stepper.id) {
+      await stepper.goTo(target, { data, bypassPolicy: true })
     }
-    go(step + 1)
+    const fields = bookingStepper.steps.find((s) => s.id === target)?.fields ?? []
+    setTimeout(() => focusFirstError(fields), 60)
   }
 
-  async function onValid(v: WizardOutput) {
+  const next = () => move((p) => stepper.next(p), true)
+  const back = () => move((p) => stepper.prev(p), false)
+  const goTo = (id: StepId) => {
+    const forward = bookingStepper.steps.findIndex((s) => s.id === id) > stepper.index
+    return move((p) => stepper.goTo(id, { ...p, bypassPolicy: true }), forward)
+  }
+
+  async function submit() {
+    // Validación final contra el contrato de cada paso guardado en Stepperize.
+    for (const step of bookingStepper.steps) {
+      const res = await stepper.validate(step.id)
+      if (!res.success) {
+        await stepper.goTo(step.id, { bypassPolicy: true })
+        await methods.trigger(step.fields)
+        setTimeout(() => focusFirstError(step.fields), 60)
+        return
+      }
+    }
+
     setSubmitState("loading")
     try {
-      const res = await createBookingRequest({
-        first_name: v.first_name,
-        last_name: v.last_name,
-        whatsapp: v.whatsapp,
-        email: v.email,
-        allergies: v.allergies,
-        skin_care_consent: true,
-        privacy_consent: true,
-        size_option_id: v.size_option_id,
-        location_id: v.location_id,
-        artist_id: v.artist_id,
-        starts_at: v.starts_at,
-        notes: v.notes,
-        reference_image_name: v.reference_image?.name ?? "",
-      })
+      const res = await createBookingRequest(toBookingRequest(stepper.data.all()))
       if (!res.ok) {
         setSubmitState("idle")
         if (res.code === "SLOT_TAKEN") {
@@ -123,8 +148,9 @@ export function BookingWizard({ catalog }: { catalog: BookingCatalog }) {
             description: "Guardamos todo lo demás que escribiste.",
           })
           methods.setValue("starts_at", "")
+          stepper.setComplete("fecha", false)
           setSlotsKey((k) => k + 1)
-          go(3)
+          await stepper.goTo("fecha", { bypassPolicy: true })
           return
         }
         sileo.error({ title: "No pudimos enviar tu solicitud", description: res.message })
@@ -141,16 +167,6 @@ export function BookingWizard({ catalog }: { catalog: BookingCatalog }) {
     }
   }
 
-  function onInvalid() {
-    // Algún paso anterior quedó incompleto: volvemos al primero con error.
-    const errors = methods.formState.errors
-    const target = STEPS.findIndex((s) => s.fields.some((f) => errors[f as keyof WizardInput]))
-    if (target >= 0) {
-      go(target)
-      setTimeout(() => focusFirstError(STEPS[target]!.fields), 50)
-    }
-  }
-
   if (done) {
     return (
       <FormProvider {...methods}>
@@ -158,9 +174,8 @@ export function BookingWizard({ catalog }: { catalog: BookingCatalog }) {
           catalog={catalog}
           onRestart={() => {
             methods.reset(DEFAULT_VALUES)
+            void stepper.reset()
             setSubmitState("idle")
-            setStep(0)
-            setFurthest(0)
             setDone(false)
           }}
         />
@@ -168,31 +183,29 @@ export function BookingWizard({ catalog }: { catalog: BookingCatalog }) {
     )
   }
 
-  const current = STEPS[step]!
+  const current = stepper.current
 
   return (
     <FormProvider {...methods}>
       <div className="mx-auto grid w-full max-w-6xl gap-x-16 px-4 sm:px-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:px-10">
-        <BookingAside catalog={catalog} step={step} />
+        <BookingAside catalog={catalog} />
 
         <form
           noValidate
           aria-labelledby="paso-titulo"
+          aria-busy={stepper.isPending || undefined}
           onSubmit={(e) => {
-            if (step < LAST) {
-              e.preventDefault()
-              void next()
-              return
-            }
-            void methods.handleSubmit(onValid, onInvalid)(e)
+            e.preventDefault()
+            if (stepper.isLast) void submit()
+            else void next()
           }}
           className="flex min-w-0 flex-col pb-28 lg:py-16 lg:pb-16"
         >
-          <WizardProgress current={step} furthest={furthest} onGo={go} />
+          <WizardProgress stepper={stepper} onGo={(id) => void goTo(id)} />
 
           <AnimatePresence mode="wait" initial={false} custom={direction}>
             <motion.section
-              key={current.key}
+              key={current.id}
               custom={direction}
               initial={{ opacity: 0, x: direction * 24 }}
               animate={{ opacity: 1, x: 0 }}
@@ -209,25 +222,27 @@ export function BookingWizard({ catalog }: { catalog: BookingCatalog }) {
                 {current.heading}
               </h2>
 
-              {step === 0 && <StepDesign />}
-              {step === 1 && <StepSize sizes={catalog.sizes} />}
-              {step === 2 && (
-                <StepPlace
-                  locations={catalog.locations}
-                  artists={catalog.artists}
-                  artistsByLocation={catalog.artistsByLocation}
-                />
-              )}
-              {step === 3 && <StepDateTime sizes={catalog.sizes} refreshKey={slotsKey} />}
-              {step === 4 && <StepDetails />}
-              {step === 5 && <StepSummary catalog={catalog} onEdit={go} />}
+              {stepper.match({
+                diseno: () => <StepDesign />,
+                tamano: () => <StepSize sizes={catalog.sizes} settings={catalog.settings} />,
+                lugar: () => (
+                  <StepPlace
+                    locations={catalog.locations}
+                    artists={catalog.artists}
+                    artistsByLocation={catalog.artistsByLocation}
+                  />
+                ),
+                fecha: () => <StepDateTime sizes={catalog.sizes} refreshKey={slotsKey} />,
+                datos: () => <StepDetails settings={catalog.settings} />,
+                resumen: () => <StepSummary catalog={catalog} onEdit={(id) => void goTo(id)} />,
+              })}
             </motion.section>
           </AnimatePresence>
 
           <WizardNav
             catalog={catalog}
-            step={step}
-            onBack={() => go(step - 1)}
+            stepper={stepper}
+            onBack={() => void back()}
             onNext={() => void next()}
             submitState={submitState}
           />
@@ -239,18 +254,19 @@ export function BookingWizard({ catalog }: { catalog: BookingCatalog }) {
 
 function WizardNav({
   catalog,
-  step,
+  stepper,
   onBack,
   onNext,
   submitState,
 }: {
   catalog: BookingCatalog
-  step: number
+  stepper: BookingStepper
   onBack: () => void
   onNext: () => void
   submitState: ActionState
 }) {
   const { size } = useSummary(catalog)
+  const busy = submitState !== "idle" || stepper.isPending
   return (
     <div
       className={cn(
@@ -259,8 +275,8 @@ function WizardNav({
       )}
     >
       <div className="mx-auto flex max-w-xl items-center gap-3 lg:max-w-none">
-        {step > 0 ? (
-          <Button type="button" variant="outline" onClick={onBack} className="shrink-0" disabled={submitState !== "idle"}>
+        {!stepper.isFirst ? (
+          <Button type="button" variant="outline" onClick={onBack} className="shrink-0" disabled={busy}>
             <ArrowLeft strokeWidth={1.5} />
             <span className="max-[359px]:sr-only">Atrás</span>
           </Button>
@@ -268,7 +284,7 @@ function WizardNav({
           <span />
         )}
         <div className="min-w-0 flex-1 text-right lg:hidden">
-          {size && step > 0 && step < LAST && (
+          {size && !stepper.isFirst && !stepper.isLast && (
             <span className="flex flex-col items-end leading-tight">
               <span className="text-[0.6875rem] tracking-[0.18em] text-muted-foreground uppercase">Referencia</span>
               <AnimatedCRCRange min={size.price_min} max={size.price_max} className="text-sm font-medium" />
@@ -276,8 +292,8 @@ function WizardNav({
           )}
         </div>
         <div className="hidden flex-1 lg:block" />
-        {step < LAST ? (
-          <Button type="button" onClick={onNext} className="shrink-0">
+        {!stepper.isLast ? (
+          <Button type="button" onClick={onNext} className="shrink-0" aria-disabled={stepper.isPending || undefined}>
             Continuar
             <ArrowRight strokeWidth={1.5} />
           </Button>
