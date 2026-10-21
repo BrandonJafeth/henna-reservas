@@ -93,6 +93,11 @@ export const settingsSchema = z.object({
   min_notice_hours: z.coerce.number().int().min(0).max(168),
   buffer_minutes: z.coerce.number().int().min(0).max(120),
   slot_interval_minutes: z.coerce.number().int().min(10).max(120),
+  drying_minutes_min: z.coerce.number().int().min(0).max(600),
+  drying_minutes_max: z.coerce.number().int().min(0).max(600),
+}).refine((v) => v.drying_minutes_max >= v.drying_minutes_min, {
+  path: ["drying_minutes_max"],
+  message: "El secado máximo debe ser mayor o igual al mínimo",
 })
 
 export const loginSchema = z.object({

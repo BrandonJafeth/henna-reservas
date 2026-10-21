@@ -30,7 +30,6 @@ import { Logo } from "@/components/brand/logo"
 import { initials, ROLE_LABEL } from "@/lib/domain"
 import { cn } from "@/lib/utils"
 import { isActive, NAV_ITEMS } from "./nav"
-import { ThemeToggle } from "./theme-toggle"
 
 function Monogram() {
   return (
@@ -98,7 +97,6 @@ export function AdminSidebar({ profile }: { profile: Profile }) {
       <SidebarFooter className="gap-2 border-t border-sidebar-border p-3">
         <div className={cn("flex items-center", state === "collapsed" ? "flex-col gap-2" : "justify-between gap-2")}>
           <UserChip profile={profile} compact={state === "collapsed"} />
-          <ThemeToggle />
         </div>
         {state !== "collapsed" && (
           <Link
@@ -125,7 +123,6 @@ export function AdminTopBar({ profile }: { profile: Profile }) {
       </Link>
       <div className="flex-1" />
       <div className="flex items-center gap-1 md:hidden">
-        <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger className="rounded-full">
             <UserChip profile={profile} compact />

@@ -2,10 +2,10 @@
 
 import { useMemo, useState } from "react"
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react"
-import type { AvailabilityOverride, Booking, Location, WeeklyAvailability } from "@/types/database"
+import type { AvailabilityOverride, Booking, Location, Profile, WeeklyAvailability } from "@/types/database"
 import { Button } from "@/components/ui/button"
 import { effectiveBlocks, type Block } from "@/lib/availability"
-import { byId } from "@/lib/domain"
+import { byId, initials } from "@/lib/domain"
 import { addDaysISO, capitalize, formatCR, formatTimeOfDay, mondayOf, timeOfCR, todayCR, toISODateCR } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import { placeClass, PlaceLegend } from "./shared"
@@ -22,6 +22,8 @@ export function WeekCalendar({
   overrides,
   bookings,
   locations,
+  artists,
+  currentArtistId,
   onEditWeekly,
   onEditOverride,
   onAddOverride,
@@ -30,6 +32,9 @@ export function WeekCalendar({
   overrides: AvailabilityOverride[]
   bookings: Booking[]
   locations: Location[]
+  /** Si viene, se muestran todas las artistas en carriles paralelos por día. */
+  artists?: Pick<Profile, "id" | "full_name">[]
+  currentArtistId: string
   onEditWeekly: (w: WeeklyAvailability) => void
   onEditOverride: (o: AvailabilityOverride) => void
   onAddOverride: (date: string) => void
@@ -45,13 +50,14 @@ export function WeekCalendar({
       Array.from({ length: 7 }, (_, i) => {
         const date = addDaysISO(weekStart, i)
         const blocks = effectiveBlocks(date, { weekly, overrides })
-        const override = overrides.find((o) => o.date === date)
+        // La excepción del encabezado es siempre la de la artista seleccionada.
+        const override = overrides.find((o) => o.date === date && o.artist_id === currentArtistId)
         const dayBookings = bookings.filter(
           (b) => toISODateCR(new Date(b.starts_at)) === date && b.status !== "cancelada",
         )
         return { date, blocks, override, bookings: dayBookings }
       }),
-    [weekStart, weekly, overrides, bookings],
+    [weekStart, weekly, overrides, bookings, currentArtistId],
   )
 
   const allBlocks = days.flatMap((d) => d.blocks)
@@ -72,14 +78,20 @@ export function WeekCalendar({
   }
 
   /** Contexto extra para lectores de pantalla; el texto visible ya nombra el bloque. */
+  const lanes = artists && artists.length > 1 ? artists : null
+  const artistName = (id: string) => artists?.find((a) => a.id === id)?.full_name
+
   function blockContext(date: string, b: Block, count: number) {
     return [
       "",
+      lanes ? artistName(b.artist_id) : null,
       capitalize(formatCR(date, "EEEE d 'de' MMMM")),
       b.source.kind === "override" ? "horario especial" : "horario semanal",
       count ? `${count} ${count === 1 ? "cita" : "citas"}` : "sin citas",
       "editar",
-    ].join(", ")
+    ]
+      .filter((x) => x !== null)
+      .join(", ")
   }
 
   return (
@@ -173,10 +185,18 @@ export function WeekCalendar({
                 const height = ((toMin(b.end_time) - toMin(b.start_time)) / 60) * HOUR_PX
                 const inBlock = d.bookings.filter((bk) => {
                   const t = timeOfCR(bk.starts_at)
-                  return bk.location_id === b.location_id && t >= b.start_time && t < b.end_time
+                  return bk.artist_id === b.artist_id && bk.location_id === b.location_id && t >= b.start_time && t < b.end_time
                 })
+                // Carriles solo en los días donde coinciden varias artistas.
+                const dayArtists = lanes ? lanes.filter((a) => d.blocks.some((x) => x.artist_id === a.id)) : []
+                const lane = dayArtists.length > 1 ? Math.max(0, dayArtists.findIndex((a) => a.id === b.artist_id)) : 0
+                const laneW = dayArtists.length > 1 ? 100 / dayArtists.length : 100
                 return (
-                  <li key={`${b.source.id}-${b.start_time}`} className="absolute inset-x-1" style={{ top: top + 2, height: height - 4 }}>
+                  <li
+                    key={`${b.source.id}-${b.start_time}`}
+                    className="absolute"
+                    style={{ top: top + 2, height: height - 4, left: `calc(${lane * laneW}% + 4px)`, width: `calc(${laneW}% - 8px)` }}
+                  >
                     <button
                       type="button"
                       onClick={() => openBlock(b)}
@@ -186,7 +206,10 @@ export function WeekCalendar({
                         b.source.kind === "override" && "border-dashed border-current",
                       )}
                     >
-                      <span className="text-[0.8125rem] font-medium leading-tight">{loc[b.location_id]?.name}</span>
+                      <span className="text-[0.8125rem] font-medium leading-tight">
+                        {lanes && <span className="mr-1">{initials(artistName(b.artist_id) ?? "")}</span>}
+                        {loc[b.location_id]?.name}
+                      </span>
                       <span className="tabular text-[0.75rem] leading-tight">
                         {b.start_time}–{b.end_time}
                       </span>
@@ -235,7 +258,7 @@ export function WeekCalendar({
               ) : (
                 <ul className="mt-3 flex flex-col gap-2">
                   {d.blocks.map((b) => {
-                    const count = d.bookings.filter((bk) => bk.location_id === b.location_id).length
+                    const count = d.bookings.filter((bk) => bk.artist_id === b.artist_id && bk.location_id === b.location_id).length
                     return (
                       <li key={`${b.source.id}-${b.start_time}`}>
                         <button
@@ -250,7 +273,10 @@ export function WeekCalendar({
                           <span className="tabular text-sm">
                             {formatTimeOfDay(b.start_time)} – {formatTimeOfDay(b.end_time)}
                           </span>
-                          <span className="text-sm font-medium">{loc[b.location_id]?.name}</span>
+                          <span className="text-sm font-medium">
+                            {loc[b.location_id]?.name}
+                            {lanes && ` · ${artistName(b.artist_id)?.split(" ")[0]}`}
+                          </span>
                           <span className="sr-only">{blockContext(d.date, b, count)}</span>
                         </button>
                       </li>

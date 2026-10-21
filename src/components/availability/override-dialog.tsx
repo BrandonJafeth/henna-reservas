@@ -46,7 +46,7 @@ export function OverrideDialog({
   function blank(): OverrideInput {
     return {
       id: initial?.id,
-      artist_id: artistId,
+      artist_id: initial?.artist_id ?? artistId,
       date: initial?.date ?? toISODateCR(new Date()),
       is_day_off: initial?.is_day_off ?? true,
       location_id: initial?.location_id ?? locations[0]?.id ?? null,

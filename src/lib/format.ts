@@ -81,6 +81,13 @@ export function formatDuration(minutes: number): string {
   return m ? `${h} h ${m} min` : `${h} h`
 }
 
+/** "2 a 3 h", "90 min a 2 h" */
+export function formatDurationRange(min: number, max: number): string {
+  if (min === max) return formatDuration(min)
+  if (min % 60 === 0 && max % 60 === 0) return `${min / 60} a ${max / 60} h`
+  return `${formatDuration(min)} a ${formatDuration(max)}`
+}
+
 export function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }

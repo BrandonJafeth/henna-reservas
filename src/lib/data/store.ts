@@ -31,10 +31,14 @@ export interface MockDB {
   settings: Settings
 }
 
-const g = globalThis as unknown as { __kkMockDB?: MockDB }
+/** Subir al cambiar la forma o el contenido de los mocks: regenera el store en caliente. */
+const MOCK_VERSION = 2
+
+const g = globalThis as unknown as { __kkMockDB?: MockDB; __kkMockVersion?: number }
 
 export function db(): MockDB {
-  if (!g.__kkMockDB) {
+  if (!g.__kkMockDB || g.__kkMockVersion !== MOCK_VERSION) {
+    g.__kkMockVersion = MOCK_VERSION
     const today = new Date()
     const bookings = buildMockBookings(today)
     g.__kkMockDB = {

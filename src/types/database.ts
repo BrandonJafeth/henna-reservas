@@ -130,6 +130,13 @@ export interface Settings {
   buffer_minutes: number
   /** Tamaño de la grilla de horas ofrecidas, en minutos */
   slot_interval_minutes: number
+  /**
+   * Tiempo que la jagua necesita secar sobre la piel, en minutos (rango).
+   * Es informativo para la clienta: no ocupa la agenda de la artista,
+   * porque la clienta se va con el gel puesto.
+   */
+  drying_minutes_min: number
+  drying_minutes_max: number
 }
 
 /** Resultado del RPC `get_available_slots` */

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { MessageCircle } from "lucide-react"
 import { sileo } from "sileo"
 import type { Booking, BookingStatus, Location, Profile, SizeOption } from "@/types/database"
-import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { BrandLabel } from "@/components/brand/brand-label"
@@ -66,24 +66,24 @@ export function BookingDetail({
   const b = booking
   const size = sizes.find((s) => s.id === b?.size_option_id)
   return (
-    <Sheet open={!!b} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full gap-0 overflow-y-auto sm:max-w-md">
+    <Dialog open={!!b} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[calc(100dvh-2rem)] gap-0 overflow-y-auto p-0 sm:max-w-2xl">
         {b && (
           <>
-            <SheetHeader className="border-b border-border px-5 pt-6 pb-5">
+            <DialogHeader className="border-b border-border px-6 pt-6 pb-5 text-left">
               <div className="flex items-center gap-2">
                 <StatusBadge status={b.status} />
               </div>
-              <SheetTitle className="font-display text-[1.75rem] leading-tight font-medium">
+              <DialogTitle className="font-display text-[1.75rem] leading-tight font-medium">
                 {b.client_first_name} {b.client_last_name}
-              </SheetTitle>
-              <SheetDescription>
+              </DialogTitle>
+              <DialogDescription>
                 {capitalize(formatCR(b.starts_at, "EEEE d 'de' MMMM"))} · {formatTimeCR(b.starts_at)}
-              </SheetDescription>
-            </SheetHeader>
+              </DialogDescription>
+            </DialogHeader>
 
-            <div className="flex flex-col gap-6 px-5 py-6">
-              <figure className="overflow-hidden rounded-lg border border-accent/45 bg-muted">
+            <div className="grid gap-6 px-6 py-6 sm:grid-cols-[minmax(0,13rem)_minmax(0,1fr)]">
+              <figure className="w-full max-w-48 self-start overflow-hidden rounded-lg border border-accent/45 bg-muted sm:max-w-none">
                 {/* eslint-disable-next-line @next/next/no-img-element -- en producción será una URL firmada de Storage */}
                 <img src={b.reference_image_url} alt={`Diseño de referencia de ${b.client_first_name}`} className="aspect-square w-full object-cover" />
                 {b.notes && <figcaption className="border-t border-border bg-card px-4 py-3 text-sm">{b.notes}</figcaption>}
@@ -119,14 +119,14 @@ export function BookingDetail({
                 <dd>{b.allergies ?? "Sin alergias indicadas"}</dd>
               </dl>
 
-              <div className="rounded-lg border border-accent/45 bg-card p-4">
+              <div className="rounded-lg border border-accent/45 bg-card p-4 sm:col-span-2">
                 <BrandLabel as="span" className="text-[0.75rem]">
                   Rango estimado
                 </BrandLabel>
                 <p className="tabular mt-1 font-display text-2xl">{formatCRCRange(b.estimated_price_min, b.estimated_price_max)}</p>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:col-span-2 sm:grid-cols-2">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="detalle-estado">Estado</Label>
                   <Select value={status} onValueChange={(v) => setStatus(v as BookingStatus)}>
@@ -164,14 +164,14 @@ export function BookingDetail({
               </div>
             </div>
 
-            <SheetFooter className="sticky bottom-0 border-t border-border bg-card px-5 py-4">
-              <ActionButton state={state} onClick={() => void save()} successLabel="Guardado" className="w-full">
+            <DialogFooter className="sticky bottom-0 border-t border-border bg-card px-6 py-4">
+              <ActionButton state={state} onClick={() => void save()} successLabel="Guardado" className="w-full sm:w-auto sm:min-w-44">
                 Guardar cambios
               </ActionButton>
-            </SheetFooter>
+            </DialogFooter>
           </>
         )}
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   )
 }

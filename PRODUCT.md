@@ -21,7 +21,9 @@ Arte artesanal hecho a mano por dos artistas locales con tinta de jagua natural 
 
 ## Operating Context
 
-- Dos lugares: Nicoya y Hojancha. Ambas artistas pueden trabajar en ambos lugares; la disponibilidad semanal y sus excepciones deciden quién está dónde cada día.
+- Dos lugares: Nicoya y Hojancha. Ambas artistas pueden trabajar en ambos lugares, e incluso en el **mismo lugar el mismo día y a la misma hora**; cada una tiene su propia agenda. La disponibilidad semanal y sus excepciones deciden quién está dónde.
+- Artistas: **Katheryn Mendez** y una segunda artista (nombre por confirmar; en el mock figura como Kimberly Rojas).
+- **Secado de la jagua: 2 a 3 horas.** Es informativo para la clienta (configurable en Ajustes) y no ocupa la agenda de la artista.
 - Confirmación final de cada cita ocurre por WhatsApp (+506).
 - Precio de referencia por tamaño; el precio final lo fija la artista según el detalle del diseño.
 - Caja con movimientos de tipo **Ingreso / Egreso** (nunca "gasto"), por artista y lugar; comisión por artista.
@@ -29,6 +31,7 @@ Arte artesanal hecho a mano por dos artistas locales con tinta de jagua natural 
 ## Capabilities and Constraints
 
 - Stack: Next.js 16 (App Router) + TypeScript estricto + Tailwind v4, pnpm, código en `src/`. shadcn/ui, Sileo (toasts), Animate UI (moderado), lucide-react.
+- Formulario de reserva: **Stepperize v8** (`@stepperize/react`) para la navegación entre pasos, con un esquema Zod por paso, y react-hook-form para los campos. Cada paso guarda sus datos tipados en `stepper.data`. El envío se arma en un único lugar (`toBookingRequest` en `src/components/booking/wizard-model.ts`), que es lo que se adapta al migrar a Supabase.
 - Backend futuro: Supabase (tablas `profiles`, `locations`, `size_options`, `weekly_availability`, `availability_overrides`, `bookings`, `cash_movements`). Fase actual: solo UI con datos mock tipados.
 - Español de Costa Rica, colones (`₡6 500`, `Intl.NumberFormat('es-CR', CRC, 0 decimales)`), zona horaria `America/Costa_Rica`, `date-fns` locale `es`.
 - Foto de referencia obligatoria (JPG/PNG/WEBP ≤ 5 MB). WhatsApp obligatorio; correo opcional.
@@ -48,14 +51,14 @@ Arte artesanal hecho a mano por dos artistas locales con tinta de jagua natural 
 
 - Nombre: **K&K Henna Artistry**. Logo en `public/brand/logo.png` (pendiente de recibir; usar wordmark tipográfico mientras tanto), `alt="K&K Henna Artistry"`.
 - Piezas de marca (lista de precios, bienvenida) son referencia visual, no assets para insertar.
-- Estilo pedido por la marca: minimalista, cálido, artesanal, elegante. Fondo crema, tarjetas marfil con borde fino cobre, etiquetas en mayúsculas con tracking amplio, separadores `—— • ——`. Títulos Cormorant Garamond, cuerpo Jost.
+- Estilo pedido por la marca: minimalista, artesanal, elegante, **neutro (beige, blanco hueso, gris cálido), sin cobre ni terracota, solo modo claro**. Tarjetas con borde fino arena, etiquetas en mayúsculas con tracking amplio, separadores `—— • ——`. Títulos Cormorant Garamond, cuerpo Jost.
 - Textos reutilizables: "Arte en la piel con tinta de jagua"; dura de 1 a 2 semanas; oscurece en las primeras 24–48 h; "Para todo servicio es necesario enviar el diseño previamente."
 - Voz: cercana, cálida, tuteo costarricense, sin tecnicismos.
 
 ## Evidence on Hand
 
 - Precios y duraciones arriba (confirmados por la marca).
-- Sin testimonios, fotos de trabajos ni nombres reales de artistas: no inventarlos fuera de datos mock claramente ficticios.
+- Sin testimonios ni fotos de trabajos: no inventarlos. Nombre real confirmado: Katheryn Mendez.
 
 ## Product Principles
 

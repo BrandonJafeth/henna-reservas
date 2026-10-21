@@ -49,7 +49,7 @@ export function BlockDialog({
   function blank(): WeeklyBlockInput {
     return {
       id: initial?.id,
-      artist_id: artistId,
+      artist_id: initial?.artist_id ?? artistId,
       weekday: initial?.weekday ?? 1,
       start_time: initial?.start_time ?? "09:00",
       end_time: initial?.end_time ?? "13:00",

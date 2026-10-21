@@ -3,17 +3,17 @@
 import { Slider as SliderPrimitive } from "radix-ui"
 import { Controller, useFormContext } from "react-hook-form"
 import { Clock } from "lucide-react"
-import type { SizeOption } from "@/types/database"
+import type { Settings, SizeOption } from "@/types/database"
 import { BrandLabel } from "@/components/brand/brand-label"
 import { EmptyState } from "@/components/brand/states"
 import { AnimatedCRCRange } from "@/components/shared/animated-money"
 import { measuredSizes, namedSizes, sizeTick, sizeValueText } from "@/lib/domain"
-import { formatDuration } from "@/lib/format"
+import { formatDuration, formatDurationRange } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import { FieldError } from "./field-message"
 import { fieldId, type WizardInput } from "./wizard-model"
 
-export function StepSize({ sizes }: { sizes: SizeOption[] }) {
+export function StepSize({ sizes, settings }: { sizes: SizeOption[]; settings: Settings }) {
   const { control, formState } = useFormContext<WizardInput>()
   const measured = measuredSizes(sizes)
   const named = namedSizes(sizes)
@@ -57,9 +57,14 @@ export function StepSize({ sizes }: { sizes: SizeOption[] }) {
               <p className="flex items-center gap-1.5 text-sm text-muted-foreground" aria-live="polite">
                 <Clock aria-hidden className="size-4" strokeWidth={1.5} />
                 {selected
-                  ? `${selected.label} · duración estimada ${formatDuration(selected.duration_minutes)}`
+                  ? `${selected.label} · aplicación de ${formatDuration(selected.duration_minutes)}`
                   : "Elegí un tamaño para ver el precio"}
               </p>
+              {selected && (
+                <p className="text-sm text-muted-foreground">
+                  Después, el gel necesita {formatDurationRange(settings.drying_minutes_min, settings.drying_minutes_max)} para secar.
+                </p>
+              )}
             </div>
 
             {measured.length > 0 && (
@@ -147,7 +152,7 @@ export function StepSize({ sizes }: { sizes: SizeOption[] }) {
                         className={cn(
                           "inline-flex min-h-11 items-center gap-2 rounded-full border px-5 text-[0.9375rem] transition-colors",
                           on
-                            ? "border-primary bg-primary text-primary-foreground"
+                            ? "border-foreground/60 bg-button text-button-foreground font-medium"
                             : "border-input bg-card hover:border-primary hover:text-primary",
                         )}
                       >

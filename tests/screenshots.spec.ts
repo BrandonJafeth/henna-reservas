@@ -4,10 +4,9 @@ import { test } from "@playwright/test"
 
 const OUT = process.env.SHOTS_DIR ?? "docs/capturas"
 
-for (const theme of ["light", "dark"] as const) {
-  test(`capturas ${theme}`, async ({ page }, info) => {
-    await page.addInitScript((t) => localStorage.setItem("kk-theme", t), theme)
-    const tag = `${info.project.name}-${theme}`
+{
+  test("capturas", async ({ page }, info) => {
+    const tag = info.project.name
 
     await page.goto("/reservar")
     await page.getByRole("heading", { name: "Tu diseño" }).waitFor()
@@ -38,5 +37,16 @@ for (const theme of ["light", "dark"] as const) {
     await page.getByRole("button", { name: "Semana siguiente" }).waitFor()
     await page.waitForTimeout(400)
     await page.screenshot({ path: `${OUT}/disponibilidad-calendario-${tag}.png`, fullPage: true })
+    await page.getByRole("switch", { name: "Ver a todas las artistas" }).click()
+    await page.waitForTimeout(400)
+    await page.screenshot({ path: `${OUT}/disponibilidad-equipo-${tag}.png`, fullPage: true })
+
+    await page.goto("/admin/citas?fecha=todas")
+    await page.getByRole("heading", { name: "Citas", level: 1 }).waitFor()
+    await page.waitForTimeout(900)
+    await page.getByRole("button", { name: /Natalia/ }).first().click()
+    await page.getByRole("dialog").waitFor()
+    await page.waitForTimeout(500)
+    await page.screenshot({ path: `${OUT}/citas-detalle-${tag}.png` })
   })
 }

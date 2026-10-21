@@ -61,6 +61,20 @@ test("flujo completo de reserva", async ({ page }) => {
   // 6 · Resumen y envío
   await expect(page.getByRole("heading", { name: "Revisá tu reserva" })).toBeVisible()
   await expect(page.locator("form dl").getByText(/Mano completa/)).toBeVisible()
+
+  // Editar desde el resumen y volver saltando con la barra de progreso.
+  await page.getByRole("button", { name: "Cambiar nombre" }).click()
+  await expect(page.getByRole("heading", { name: "Tus datos" })).toBeVisible()
+  await page.getByLabel("Apellido").fill("")
+  await page.getByRole("button", { name: /Resumen/ }).click()
+  // El guard no deja saltar con un paso inválido: se queda y enfoca el error.
+  await expect(page.getByRole("heading", { name: "Tus datos" })).toBeVisible()
+  await expect(page.getByText("Escribí tu apellido")).toBeVisible()
+  await expect(page.getByLabel("Apellido")).toBeFocused()
+  await page.getByLabel("Apellido").fill("Chaves")
+  await page.getByRole("button", { name: /Resumen/ }).click()
+  await expect(page.getByRole("heading", { name: "Revisá tu reserva" })).toBeVisible()
+
   await page.getByRole("button", { name: "Reservar" }).click()
   await expect(page.getByRole("heading", { name: "Recibimos tu solicitud." })).toBeVisible({ timeout: 10_000 })
   await expect(page.getByText("Te escribiremos por WhatsApp para confirmar tu cita")).toBeVisible()

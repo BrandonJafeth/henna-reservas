@@ -13,7 +13,7 @@ import type { BookingCatalog } from "./wizard-model"
  * Columna de marca. En celular es un encabezado compacto; en escritorio
  * queda fija a la izquierda y va armando el resumen de la reserva.
  */
-export function BookingAside({ catalog, step }: { catalog: BookingCatalog; step: number }) {
+export function BookingAside({ catalog }: { catalog: BookingCatalog }) {
   const { v, size, location, artist } = useSummary(catalog)
   const rows = [
     { label: "Diseño", value: v.reference_image ? "Foto lista" : null },
@@ -49,7 +49,6 @@ export function BookingAside({ catalog, step }: { catalog: BookingCatalog; step:
       <section
         aria-label="Tu reserva hasta ahora"
         className="mt-10 hidden w-full max-w-sm rounded-lg border border-accent/45 bg-card p-6 lg:block"
-        data-step={step}
       >
         <BrandLabel as="h2" className="text-center">
           Tu reserva

@@ -11,12 +11,8 @@ async function audit(page: Page, label: string) {
   expect(summary, `Violaciones de axe en ${label}`).toEqual([])
 }
 
-for (const theme of ["light", "dark"] as const) {
-  test.describe(`tema ${theme}`, () => {
-    test.beforeEach(async ({ page }) => {
-      await page.addInitScript((t) => localStorage.setItem("kk-theme", t), theme)
-    })
-
+{
+  test.describe("accesibilidad", () => {
     test("/reservar · pasos del formulario", async ({ page }) => {
       await page.goto("/reservar")
       await expect(page.getByRole("heading", { name: "Tu diseño" })).toBeVisible()

@@ -44,11 +44,17 @@ async function AvailabilityLoader({ searchParams }: { searchParams: SearchParams
   const artistId =
     profile.role === "admin" && requested && artists.some((a) => a.id === requested) ? requested : profile.id
   const today = todayCR()
-  const [weekly, overrides, bookings] = await Promise.all([
-    getWeeklyAvailability(artistId),
-    getAvailabilityOverrides(artistId),
-    getBookings({ artist_id: artistId, from: addDaysISO(today, -28), to: addDaysISO(today, 60) }),
+  const range = { from: addDaysISO(today, -28), to: addDaysISO(today, 60) }
+  // Se traen las de todas las artistas para la vista conjunta del calendario
+  // (dos artistas pueden atender en el mismo lugar el mismo día).
+  const [allWeekly, allOverrides, allBookings] = await Promise.all([
+    getWeeklyAvailability(),
+    getAvailabilityOverrides(),
+    getBookings(range),
   ])
+  const weekly = allWeekly.filter((w) => w.artist_id === artistId)
+  const overrides = allOverrides.filter((o) => o.artist_id === artistId)
+  const bookings = allBookings.filter((b) => b.artist_id === artistId)
   return (
     <AvailabilityManager
       profile={profile}
@@ -58,6 +64,7 @@ async function AvailabilityLoader({ searchParams }: { searchParams: SearchParams
       weekly={weekly}
       overrides={overrides}
       bookings={bookings}
+      team={profile.role === "admin" ? { weekly: allWeekly, overrides: allOverrides, bookings: allBookings } : null}
     />
   )
 }

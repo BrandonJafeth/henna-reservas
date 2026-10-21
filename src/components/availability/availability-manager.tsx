@@ -8,6 +8,7 @@ import type { AvailabilityOverride, Booking, Location, Profile, WeeklyAvailabili
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   AlertDialog,
@@ -43,6 +44,7 @@ export function AvailabilityManager({
   weekly,
   overrides,
   bookings,
+  team,
 }: {
   profile: Profile
   artists: Profile[]
@@ -51,6 +53,8 @@ export function AvailabilityManager({
   weekly: WeeklyAvailability[]
   overrides: AvailabilityOverride[]
   bookings: Booking[]
+  /** Datos de todas las artistas (solo admin) para la vista conjunta */
+  team: { weekly: WeeklyAvailability[]; overrides: AvailabilityOverride[]; bookings: Booking[] } | null
 }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -60,6 +64,7 @@ export function AvailabilityManager({
   const [blockDialog, setBlockDialog] = useState<Partial<WeeklyAvailability> | null>(null)
   const [overrideDialog, setOverrideDialog] = useState<Partial<AvailabilityOverride> | null>(null)
   const [confirm, setConfirm] = useState<Confirm>(null)
+  const [showTeam, setShowTeam] = useState(false)
 
   const thisWeek = mondayOf(todayCR())
   const prevWeekLabel = `${formatCR(addDaysISO(thisWeek, -7), "d MMM")} – ${formatCR(addDaysISO(thisWeek, -1), "d MMM")}`
@@ -186,11 +191,22 @@ export function AvailabilityManager({
             />
           </TabsContent>
 
-          <TabsContent value="calendario" className="mt-4">
+          <TabsContent value="calendario" className="mt-4 flex flex-col gap-4">
+            {team && artists.length > 1 && (
+              <div className="flex flex-wrap items-center gap-3">
+                <Switch id="ver-equipo" checked={showTeam} onCheckedChange={setShowTeam} />
+                <Label htmlFor="ver-equipo" className="text-sm">
+                  Ver a todas las artistas
+                </Label>
+                <span className="text-sm text-muted-foreground">Útil cuando dos atienden en el mismo lugar el mismo día.</span>
+              </div>
+            )}
             <WeekCalendar
-              weekly={weekly}
-              overrides={overrides}
-              bookings={bookings}
+              weekly={showTeam && team ? team.weekly : weekly}
+              overrides={showTeam && team ? team.overrides : overrides}
+              bookings={showTeam && team ? team.bookings : bookings}
+              artists={showTeam && team ? artists : undefined}
+              currentArtistId={artistId}
               locations={locations}
               onEditWeekly={(w) => setBlockDialog(w)}
               onEditOverride={(o) => setOverrideDialog(o)}
