@@ -32,7 +32,12 @@ test("flujo completo de reserva", async ({ page }) => {
 
   // 4 · Fecha y hora: primer día habilitado y primera hora
   await expect(page.getByRole("heading", { name: "Día y hora" })).toBeVisible()
+  await page.getByRole("grid").waitFor()
   const enabled = page.getByRole("button", { name: /, disponible/ })
+  // Si el mes visible ya no tiene espacios, avanzar (el mock acumula reservas en memoria).
+  for (let i = 0; i < 2 && !(await enabled.count()); i++) {
+    await page.getByRole("button", { name: "Ir al mes siguiente" }).click()
+  }
   await enabled.first().click()
   await page.getByRole("button", { pressed: false, name: /a\. m\.|p\. m\./ }).first().click()
   await next.click()
