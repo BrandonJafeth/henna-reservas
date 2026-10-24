@@ -8,12 +8,12 @@ web
 
 ## Users
 
-- **Clientas (público):** personas de Nicoya, Hojancha y alrededores (Guanacaste, Costa Rica) que quieren un tatuaje temporal con tinta de jagua. Reservan casi siempre desde el celular, a menudo después de ver el trabajo en redes sociales y con una foto de referencia ya guardada en el teléfono.
+- **Clientes (público):** personas de Nicoya, Hojancha y alrededores (Guanacaste, Costa Rica) que quieren un tatuaje temporal con tinta de jagua. Reservan casi siempre desde el celular, a menudo después de ver el trabajo en redes sociales y con una foto de referencia ya guardada en el teléfono.
 - **Artistas (admin):** dos artistas que diseñan y aplican cada pieza a mano. Usan el panel desde el celular entre citas y desde escritorio para planificar: confirman citas por WhatsApp, fijan el precio final, gestionan su disponibilidad semanal y registran movimientos de caja. Roles: `admin` (todo, incluidos ajustes) y `tatuadora`.
 
 ## Product Purpose
 
-Sistema de reservas de K&K Henna Artistry. Reemplaza la coordinación manual por mensajes: la clienta envía su diseño, tamaño, lugar, artista, fecha y hora en un solo flujo; las artistas confirman por WhatsApp. Éxito = solicitudes completas (con diseño adjunto) y menos ida y vuelta de mensajes.
+Sistema de reservas de K&K Henna Artistry. Reemplaza la coordinación manual por mensajes: el cliente envía su diseño, tamaño, lugar, artista, fecha y hora en un solo flujo; las artistas confirman por WhatsApp. Éxito = solicitudes completas (con diseño adjunto) y menos ida y vuelta de mensajes.
 
 ## Positioning
 
@@ -23,7 +23,7 @@ Arte artesanal hecho a mano por dos artistas locales con tinta de jagua natural 
 
 - Dos lugares: Nicoya y Hojancha. Ambas artistas pueden trabajar en ambos lugares, e incluso en el **mismo lugar el mismo día y a la misma hora**; cada una tiene su propia agenda. La disponibilidad semanal y sus excepciones deciden quién está dónde.
 - Artistas: **Katheryn Mendez** y una segunda artista (nombre por confirmar; en el mock figura como Kimberly Rojas).
-- **Secado de la jagua: 2 a 3 horas.** Es informativo para la clienta (configurable en Ajustes) y no ocupa la agenda de la artista.
+- **Secado de la jagua: 2 a 3 horas.** Es informativo para el cliente (configurable en Ajustes) y no ocupa la agenda de la artista.
 - Confirmación final de cada cita ocurre por WhatsApp (+506).
 - Precio de referencia por tamaño; el precio final lo fija la artista según el detalle del diseño.
 - Caja con movimientos de tipo **Ingreso / Egreso** (nunca "gasto"), por artista y lugar; comisión por artista.
@@ -64,9 +64,9 @@ Arte artesanal hecho a mano por dos artistas locales con tinta de jagua natural 
 
 ## Product Principles
 
-1. El diseño de la clienta es el centro: sin foto de referencia no hay reserva.
+1. El diseño del cliente es el centro: sin foto de referencia no hay reserva.
 2. Precio honesto: siempre "de referencia", nunca prometer precio final.
-3. Celular primero en ambos lados: clienta reserva y artista gestiona desde el teléfono.
+3. Celular primero en ambos lados: el cliente reserva y artista gestiona desde el teléfono.
 4. Calidez artesanal en los detalles, claridad en las tareas.
 
 ## Accessibility & Inclusion

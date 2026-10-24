@@ -438,8 +438,8 @@ function BookingRules({ settings }: { settings: Settings }) {
     { key: "min_notice_hours", label: "Anticipación mínima", unit: "horas", hint: "Tiempo mínimo entre la solicitud y la cita." },
     { key: "buffer_minutes", label: "Espacio entre citas", unit: "min", hint: "Minutos libres para limpiar y preparar." },
     { key: "slot_interval_minutes", label: "Intervalo de horas", unit: "min", hint: "Cada cuánto se ofrecen horas (p. ej. cada 30 min)." },
-    { key: "drying_minutes_min", label: "Secado mínimo", unit: "min", hint: "Tiempo mínimo que el gel de jagua tarda en secar. Se le muestra a la clienta." },
-    { key: "drying_minutes_max", label: "Secado máximo", unit: "min", hint: "No bloquea la agenda: la clienta se entera antes de reservar." },
+    { key: "drying_minutes_min", label: "Secado mínimo", unit: "min", hint: "Tiempo mínimo que el gel de jagua tarda en secar. Se le muestra al cliente." },
+    { key: "drying_minutes_max", label: "Secado máximo", unit: "min", hint: "No bloquea la agenda: el cliente se entera antes de reservar." },
   ]
   return (
     <form

@@ -56,7 +56,7 @@ export function timeOfCR(value: Date | string): string {
   return formatCR(value, "HH:mm")
 }
 
-/** "9:00 a. m." legible para la clienta (misma forma que formatTimeOfDay) */
+/** "9:00 a. m." legible para el cliente (misma forma que formatTimeOfDay) */
 export function formatTimeCR(value: Date | string): string {
   return formatTimeOfDay(formatCR(value, "HH:mm"))
 }

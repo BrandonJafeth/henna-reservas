@@ -53,7 +53,7 @@ export function BookingsView({
           <TableHeader>
             <TableRow className="hover:bg-transparent">
               <TableHead className="pl-5">Fecha</TableHead>
-              <TableHead>Clienta</TableHead>
+              <TableHead>Cliente</TableHead>
               <TableHead>Tamaño</TableHead>
               <TableHead>Lugar</TableHead>
               <TableHead>Artista</TableHead>

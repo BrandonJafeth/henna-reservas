@@ -132,8 +132,8 @@ export interface Settings {
   slot_interval_minutes: number
   /**
    * Tiempo que la jagua necesita secar sobre la piel, en minutos (rango).
-   * Es informativo para la clienta: no ocupa la agenda de la artista,
-   * porque la clienta se va con el gel puesto.
+   * Es informativo para el cliente: no ocupa la agenda de la artista,
+   * porque el cliente se va con el gel puesto.
    */
   drying_minutes_min: number
   drying_minutes_max: number
