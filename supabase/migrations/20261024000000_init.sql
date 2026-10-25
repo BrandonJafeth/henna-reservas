@@ -576,7 +576,7 @@ create policy "overrides: propia o admin" on public.availability_overrides
 -- clientes: admin todo; tatuadora solo los que tienen cita con ella
 create policy "clients: admin" on public.clients
   for all to authenticated using ((select public.is_admin())) with check ((select public.is_admin()));
-create policy "clients: tatuadora ve los suyos" on public.clients
+create policy "clients: tatuadora ve las suyas" on public.clients
   for select to authenticated using (
     exists (select 1 from public.bookings b
             where b.client_id = clients.id and b.artist_id = (select auth.uid()))

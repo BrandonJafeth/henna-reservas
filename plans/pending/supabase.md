@@ -11,9 +11,9 @@ La UI ya está hecha. Solo cambian la capa de datos, la autenticación y las acc
 
 | Hallazgo | Consecuencia |
 |---|---|
-| `supabase/migrations/20261024000000_init.sql` **no existía** en ninguna rama | Lo creé con tu script tal cual. Solo cambié "clientas" por "clientes" en comentarios y en el nombre de una política (`clients: tatuadora ve los suyos`). |
+| `supabase/migrations/20261024000000_init.sql` **no existía** en ninguna rama | Lo creé con tu script tal cual. Solo cambié "clientas" por "clientes" en comentarios, que no se guardan en la base, así que el archivo coincide con lo aplicado. |
 | La migración aplica **sin errores** en Postgres 16 con un shim mínimo de Supabase (roles, `auth.users`, `auth.uid()`) | Sirve como base para los tests SQL en este contenedor. |
-| La cuenta de Supabase conectada **no tiene un proyecto de Henna**. Solo están "Fotografia" y "Jardín Virtual Interactivo". | No puedo saber si la migración está aplicada en el proyecto remoto. Por tu indicación, **espero** y no aplico nada. |
+| El proyecto de Henna **existe en otra cuenta** y ya tiene el script aplicado. Las credenciales las tiene el dueño. | Las migraciones nuevas (M1…) se escriben y prueban aquí; vos las aplicás. Si corriste la inicial desde el SQL Editor, antes del primer `supabase db push` hay que correr `supabase migration repair --status applied 20261024000000`. |
 | `get_public_artists` y `get_available_slots` exigen `role = 'tatuadora'`. Lo probé: la admin con horario **no aparece** en el formulario. | En los mocks y los e2e, Kimberly es admin **y** artista. Ver M1. |
 | `create_booking` hace un upsert por teléfono que **sobrescribe** nombre y correo. Lo probé. | Cualquiera que sepa un teléfono puede cambiarle los datos a un cliente. Ver M1. |
 | `supabase start` no corre en este contenedor. La red bloquea las imágenes (public.ecr.aws responde 403 por política y Docker Hub responde 429). | Los tests SQL corren aquí contra Postgres 16 + shim. Los e2e contra Supabase local los dejo listos para que corran en tu máquina (sección 4). |
@@ -224,9 +224,7 @@ Si alguno está mal, corregime ahora. Si no, sigo con ellos.
 
 Cada una lleva mi recomendación. Con "sí a todo", sigo así.
 
-1. **Proyecto de Supabase.** No lo veo en la cuenta conectada. ¿Ya existe en otra cuenta, o lo creás vos? Recomiendo que lo creés vos en el panel, en la región `us-east-1`.
-   - Para que yo pueda conectarlo, agregá `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` y `SUPABASE_SECRET_KEY` como variables del entorno (menú del entorno en la barra del título → Edit). Una sesión nueva las toma. No me pegués llaves en el chat.
-   - Si el proyecto queda en la cuenta conectada, también puedo revisar tablas y migraciones desde aquí.
+1. **Proyecto de Supabase.** ✅ Ya existe y tiene la migración inicial aplicada. Las credenciales quedan en tu poder: yo trabajo contra una copia local de la base y vos probás contra el proyecto real con tu `.env.local`.
 2. **M1 (correcciones):** ¿la aplico con los seis puntos (a–f)? Recomiendo que sí.
 3. **M2 `get_available_days`:** ¿una función en la base en vez de ~29 llamadas por calendario? Recomiendo que sí.
 4. **M3 `set_day_schedule`:** ¿cambios por día atómicos en la base? Recomiendo que sí.
